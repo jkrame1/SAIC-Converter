@@ -1,0 +1,52 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=DAC Version B 1.0.2
+*Date=15:18:01
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;33k;THT;31.656;-86.296;45;Bottom;R2
+2;100k;THT;31.0743;-99.1136;-135;Bottom;R3
+3;;;17.9879;-92.2278;-90;Bottom;Teensy 3.2
+4;;;26.7942;-56.1872;0;Bottom;Jumper8
+5;;DIP (Dual Inline) [THT];6.06326;-11.7422;0;Bottom;CV Output Buffer
+6;100;THT;6.41604;-23.9571;180;Bottom;R28
+7;;;25.1531;-21.3863;0;Bottom;Jumper5
+8;;;11.6887;-69.8016;0;Bottom;Jumper2
+9;;;8.92951;-29.8699;0;Bottom;Jumper3
+10;;THT;12.6294;-24.2086;180;Bottom;CV in
+11;;to-92;30.287;-75.8352;180;Bottom;Q3
+12;;DIP (Dual Inline) [THT];26.2165;-11.6229;0;Bottom;DAC1
+13;;;1.6462;-102.972;90;Bottom;TXT1
+14;;THT;7.29262;-44.6911;0;Bottom;Eurorack Power Header
+15;;;11.66;-29.8488;0;Bottom;Jumper4
+16;100;THT;6.32573;-26.1782;180;Bottom;R27
+17;;THT;19.2538;-60.4419;-90;Bottom;Expander Header
+18;33k;THT;31.7249;-101.984;45;Bottom;R4
+19;;;25.2067;-21.4033;0;Bottom;Jumper6
+20;100k;THT;31.2558;-83.5001;-135;Bottom;R1
+21;;to-92;29.8738;-108.452;180;Bottom;Q2
+22;;THT;29.1394;-54.0536;-90;Bottom;J2
+23;;THT;12.6294;-9.60356;180;Bottom;J3
+24;;THT;6.02065;-76.4431;0;Bottom;Interface Pots
+25;;;19.3675;-46.2572;0;Bottom;Jumper7
+26;;;28.1869;-60.2272;0;Bottom;Jumper9
+27;33k;THT;31.0255;-48.2708;0;Bottom;R8
+28;;THT;6.14511;-62.109;-180;Bottom;Power and I2C Header
+29;;;11.557;-72.1722;0;Bottom;Jumper1
+30;;DIP (Dual Inline) [THT];24.2807;-31.4134;180;Bottom;DAC2
+31;;to-92;29.6147;-44.9144;0;Bottom;Q4
+32;100;THT;6.28678;-31.0694;180;Bottom;R25
+33;100;THT;6.38528;-28.677;180;Bottom;R26
+34;;to-92;30.3324;-93.4588;180;Bottom;Q1
+35;33k;THT;32.7166;-69.1392;51.9312;Bottom;R6
+36;100k;THT;31.4079;-60.8639;-90;Bottom;R5
+37;100k;THT;30.4713;-50.5136;180;Bottom;R7
