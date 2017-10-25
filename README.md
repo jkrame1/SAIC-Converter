@@ -1,3 +1,3 @@
-# SAIC-Converter
+# Signal-to-Symbol-Converter
 
-This is aproject well update this gughghhhh
+Teensy-based Analog to Digital conversion device using 2 4922 12-bit DACs for 4 channels of Analog Output
