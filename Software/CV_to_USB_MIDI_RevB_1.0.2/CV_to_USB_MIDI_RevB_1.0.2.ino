@@ -2,26 +2,26 @@
 /*
 
   Triggers all generate Notes over USB MIDI
-       -> 60  (PIN D4)
+  *    -> 60  (PIN D4)
   **   -> 61  (PIN D5)
   ***  -> 62  (PIN D3)
   **** -> 63  (PIN D0)
 
   CV Inputs are mapped to CC values
-       -> 10  (PIN A2)
+  *    -> 10  (PIN A2)
   **   -> 11  (PIN A3)
   ***  -> 91  (PIN A6)
   **** -> 93  (PIN A7)
 
   Knobs are mapped CC Values
-       -> 20  (PIN A12)
+  *    -> 20  (PIN A12)
   **   -> 21  (PIN A13)
   ***  -> 22  (PIN A10)
   **** -> 23  (PIN A11)
 
 
   CV Outputs have the following Functions
-       -> outputs only note#0, DAC value = to velocity scaled to 12bit, responds to note off
+  *    -> outputs only note#0, DAC value = to velocity scaled to 12bit, responds to note off
   **   -> outputs only note#1, DAC value = to velocity scaled to 12bit, responds to note off
   ***  -> outputs a voltage read on USB MIDI coming in on CC#22
   **** -> outputs a pitch relative to...???
