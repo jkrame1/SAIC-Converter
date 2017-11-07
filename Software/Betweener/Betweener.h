@@ -1,12 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////
 //  Betweener.h
 //  
-//  Defines the Betweener class, which sets up the software mappings
-//  that enable Teensy to communicate via the hardware setup on the
-//  whatever-it's-called device itself.
+//  This .h file defines the Betweener class, setting up all the
+//  variables and providing the "function prototypes" that tell the
+//  compiler what functions the class contains.  The associated .cpp file has
+//  the implementation (the actual code) for all the functions.
+//
+//  The purpose of the Betweener class is to set up the software mappings
+//  that enable Teensy to communicate via the soldered-together connections
+//  on the whatever-it's-called device itself.
 //
 //  The Betweener class also includes functions that allow a
-//  relatively automated set of read/write operations so that the
+//  relatively streamlined set of read/write operations so that the
 //  device can mediate between CV inputs and outputs, MIDI inputs and
 //  outputs, and trigger inputs.
 //
@@ -19,7 +24,6 @@
 //
 //  REFERENCES AND CREDITS:
 //      (need to fill this out)
-//
 //
 //
 //  CHANGE LOG:
@@ -64,7 +68,7 @@
 //definitions relate to hard-wired configuration choices.
 
 //SPI is a communication protocol used for the digital-analog-converters (DACs)
-//in the Betweener.  These are used to create the CV outputs.
+//in the device.  These are used to create the CV outputs.
 //SPI communication requires two pins for special functions,
 //called MOSI and SCK.
 #define SPI_MOSI 7 // note this is technically the "alternate" MOSI option for Teensy
@@ -73,7 +77,8 @@
 //which DAC we are sending messages to
 #define DAC_CHIP_SELECT1 1
 #define DAC_CHIP_SELECT2 2
-//Identify the 4 CV outs with the right chip and DAC
+//Identify the 4 CV outs with the right chip and DAC.
+//This is something that may change for different board versions.
 #define CVIN1_CHIP_SELECT 2
 #define CVIN1_DAC_CHANNEL 1
 #define CVIN2_CHIP_SELECT 1
@@ -83,7 +88,7 @@
 #define CVIN4_CHIP_SELECT 1
 #define CVIN4_DAC_CHANNEL 1
 
-
+//Other pins used for inputs (which may change for different board versions)
 //digital pins used for trigger inputs
 #define TRIGGER_INPUT1 0
 #define TRIGGER_INPUT2 3
@@ -108,8 +113,16 @@
 //the set of variables that they use and control.  A special method called the
 //"constructor" is the one that initially builds the object and puts in all the
 //default variable definitions.  The other methods provide a flexible interface
-//for defining how the Betweener maps inputs to outputs and for controlling the order
-//of its read/write operations and other operations.
+//for defining how the Betweener maps inputs to outputs and for controlling
+//its read/write operations and other operations.
+//
+//All variables and all methods get declared in this .h file, but the actual
+//code for the functions themselves lives in the .cpp file, not here.  The
+//.h file does have some core definitions of defaults for some variables, but
+//mostly it exists to tell the compiler how much space to allocate when
+//building a Betweener object, and what kinds of structures to expect the
+//Betweener objects to contain.  The compiler then looks in the .cpp file to
+//fill in the details of the actual functions/code.
 
 class Betweener
 {
@@ -124,6 +137,7 @@ class Betweener
     
     Betweener();  //constructor; does all setup and initialization stuff
 
+    ////////////////////////
     // INPUT FUNCTIONS
     // You have the choice of manually asking the device to read the various
     // types of input one at a time, or asking it to read all of them at once.
@@ -135,7 +149,20 @@ class Betweener
     
     void readAllInputs(void); //reads triggers, CV, knobs, and USB MIDI inputs, in that order
     
+    //single channel read functions:
+    void readTrigger(int channel);
+    void readCVInput(int channel);
+    void readKnob(int channel);
+
     
+    //the functions below do some scaling and reduce jitter to prepare
+    //CV and knob inputs for MIDI output
+    int readCVInputMIDI(int channel);
+    int readKnobMIDI(int channel);
+    
+    
+    
+    /////////////////////////
     //BASIC OUTPUT FUNCTIONS
     //These functions assume you are using your sketch to decide directly what
     //output to write.  The functions are mainly useful for just hiding some of the
@@ -152,6 +179,18 @@ class Betweener
     //they can be accessed via Betweener::receivedNoteOn(...) etc.
     static void MCP4922_write(int cs_pin, byte dac, int value);
 
+    
+    //Scaling and conversion functions.  You can use these directly
+    //and they are also used by some of the read functions
+    int CVtoMIDI(int val);
+    int MIDItoCV(int val);
+    int KnobToMIDI(int val);
+    
+    
+    
+    
+    
+    
     // variables that are used by these functions:
     elapsedMillis msecTickerCVRead;  //ticker for elapsed time since last analog read
     elapsedMillis msecTickerTrigger; //ticker for elapsed time since last trigger
