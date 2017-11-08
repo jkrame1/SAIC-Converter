@@ -1,0 +1,53 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=DAC Version B 1.0.3
+*Date=12:53:16
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;100k;THT;31.2558;-82.936;-135;Bottom;R1
+2;100;THT;6.41604;-23.1108;180;Bottom;R28
+3;33k;THT;31.7249;-101.42;45;Bottom;R4
+4;100;THT;6.14567;-29.7997;180;Bottom;R25
+5;220;THT;18.8912;-50.0073;90;Bottom;R_LED
+6;;;20.3318;-47.3395;0;Bottom;Jumper7
+7;;DIP (Dual Inline) [THT];6.06326;-11.1781;0;Bottom;CV Output Buffer
+8;100k;THT;29.9497;-66.6498;-135;Bottom;R5
+9;;;24.828;-20.2958;0;Bottom;Jumper6
+10;;DIP (Dual Inline) [THT];24.2807;-30.8493;180;Bottom;DAC2
+11;;;12.3096;-33.9718;0;Bottom;Jumper10
+12;;to-92;29.6147;-44.3502;0;Bottom;Q4
+13;;;27.7193;-55.9129;0;Bottom;Jumper8
+14;;;16.5767;-91.6637;-90;Bottom;Teensy 3.2
+15;33k;THT;31.8699;-69.4215;38.362;Bottom;R6
+16;;to-92;29.768;-92.8947;180;Bottom;Q1
+17;;;26.4372;-20.1802;0;Bottom;Jumper5
+18;;THT;6.14511;-62.956;-180;Bottom;Power and I2C Header
+19;;THT;7.48086;-43.6565;0;Bottom;Eurorack Power Header
+20;100;THT;6.31472;-27.619;180;Bottom;R26
+21;;to-92;29.8738;-107.888;180;Bottom;Q2
+22;100k;THT;29.9068;-49.879;180;Bottom;R7
+23;;DIP (Dual Inline) [THT];26.2165;-9.64763;0;Bottom;DAC1
+24;;THT;12.6294;-9.03944;180;Bottom;CV Out
+25;;THT;21.0411;-58.7489;-90;Bottom;Expander Header
+26;;THT;12.6294;-23.6444;180;Bottom;CV in
+27;;THT;6.02065;-75.879;0;Bottom;Interface Pots
+28;33k;THT;31.656;-85.7319;45;Bottom;R2
+29;33k;THT;31.0255;-47.7067;0;Bottom;R8
+30;;5 mm [THT];21.6207;-44.1157;180;Bottom;LED1
+31;100k;THT;31.0743;-98.5495;-135;Bottom;R3
+32;;to-92;30.287;-75.2711;180;Bottom;Q3
+33;100;THT;6.32573;-25.3319;180;Bottom;R27
+34;;;26.5957;-60.3764;0;Bottom;Jumper9
+35;;;10.5339;-66.9021;0;Bottom;Jumper11
+36;;THT;14.8872;-46.7867;0;Bottom;5V Euro
+37;;THT;29.1394;-53.4894;-90;Bottom;J2
+38;;;1.3964;-103.485;90;Bottom;TXT1

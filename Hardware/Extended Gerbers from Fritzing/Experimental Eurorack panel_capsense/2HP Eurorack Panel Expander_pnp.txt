@@ -1,0 +1,44 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=2HP Eurorack Panel Expander
+*Date=13:13:13
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;6.98509;-124.2;0;Bottom;Hole6
+2;;;7.76101;-117.78;0;Bottom;Via9
+3;;;6.20879;-1.92759;0;Bottom;Hole10
+4;;;4.10247;-36.4996;0;Bottom;Hole3
+5;;;2.25768;-96.3308;0;Bottom;Via4
+6;;PG203J [THT];4.82667;-84.3919;0;Bottom;PJ1
+7;;;4.81719;-6.67809;0;Bottom;TXT1
+8;;;5.78546;-112.7;0;Bottom;Via12
+9;;;4.79768;-118.626;0;Bottom;Via2
+10;;THT;4.79778;-67.1208;0;Bottom;J1
+11;;;2.11657;-106.209;0;Bottom;Via5
+12;;;5.78546;-101.129;0;Bottom;Via7
+13;;;3.90407;-53.2449;0;Bottom;Hole1
+14;;;8.04324;-105.644;0;Bottom;Via3
+15;;;7.62009;-124.177;0;Bottom;Hole5
+16;;;7.80268;-1.95647;0;Bottom;Hole8
+17;;;3.14111;-50.7049;0;Bottom;Pad1
+18;;;6.9848;-1.92769;0;Bottom;Hole9
+19;;;3.38657;-107.196;0;Bottom;Via13
+20;;;2.39879;-112.982;0;Bottom;Via6
+21;;;3.24553;-33.9597;0;Bottom;Pad3
+22;;;4.13097;-19.1404;0;Bottom;Hole2
+23;;;1.83435;-119.755;0;Bottom;Via1
+24;;;4.93897;-84.9479;0;Bottom;Hole4
+25;;;7.26712;-77.4219;0;Bottom;Via8
+26;;;6.13842;-124.2;0;Bottom;Hole7
+27;;;6.91435;-92.9442;0;Bottom;Via10
+28;;;1.2699;-100.705;0;Bottom;Via11
+29;;;3.27403;-16.6948;0;Bottom;Pad2

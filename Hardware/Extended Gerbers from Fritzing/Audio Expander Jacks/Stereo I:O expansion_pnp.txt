@@ -1,0 +1,24 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=Stereo I:O expansion
+*Date=13:02:56
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;PG203J [THT];3.85921;-64.0206;0;Bottom;IN Left
+2;;;3.92862;-19.0512;0;Bottom;Hole3
+3;;;4.02288;-7.38607;0;Bottom;Hole4
+4;;THT;5.16128;-34.4798;180;Bottom;OUTLGR-INRL
+5;;PG203J [THT];3.90634;-18.5122;0;Bottom;OUT Left
+6;;PG203J [THT];3.95121;-53.3628;180;Bottom;IN Right
+7;;PG203J [THT];3.99834;-7.99543;180;Bottom;OUT Right
+8;;;3.92862;-64.5831;0;Bottom;Hole1
+9;;;3.92862;-52.7298;0;Bottom;Hole2
