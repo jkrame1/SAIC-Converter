@@ -17,9 +17,11 @@ const int channel = 1;
 
 void setup() {
   Serial.begin(115200);
+
+  //tell USB MIDI what to do when the following messages are recieved:
   usbMIDI.setHandleNoteOff(OnNoteOff);
   usbMIDI.setHandleNoteOn(OnNoteOn);
-  usbMIDI.setHandleVelocityChange(OnVelocityChange);
+//  usbMIDI.setHandleVelocityChange(OnVelocityChange); //not currently used
   usbMIDI.setHandleAfterTouch(OnAfterTouch);
 }
 
