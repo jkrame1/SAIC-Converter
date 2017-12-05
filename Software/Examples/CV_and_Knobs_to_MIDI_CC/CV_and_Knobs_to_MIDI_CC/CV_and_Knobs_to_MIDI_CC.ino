@@ -4,6 +4,9 @@ Betweener b;
 
 // the MIDI channel number to send messages
 const int channel = 1;
+int chip_select = 1;
+int chip_select2 = 2;
+
 
 // create variables to store current and previous values of knobs and CV Inputs
 int  CurrentCV1, CurrentCV2, CurrentCV3, CurrentCV4 = -1;
@@ -28,6 +31,7 @@ void setup() {
 
 
 void loop() {
+
   // ask the betweener to read its analog inputs
   CurrentCV1 = b.readCVInputMIDI(1);
   CurrentCV2 = b.readCVInputMIDI(2);
@@ -52,10 +56,10 @@ void loop() {
     usbMIDI.sendControlChange(CC3, CurrentCV3, channel);
     prevCV3 = CurrentCV3;
   }
-//  if (CurrentCV4 != prevCV4) {
-//    usbMIDI.sendControlChange(CC4, CurrentCV4, channel);
-//    prevCV4 = CurrentCV4;
-//  }
+  if (CurrentCV4 != prevCV4) {
+    usbMIDI.sendControlChange(CC4, CurrentCV4, channel);
+    prevCV4 = CurrentCV4;
+  }
 
   if (CurrentKnob1 != prevKnob1) {
     usbMIDI.sendControlChange(CC5, CurrentKnob1, channel);
@@ -69,12 +73,12 @@ void loop() {
     usbMIDI.sendControlChange(CC7, CurrentKnob3, channel);
     prevKnob3 = CurrentKnob3;
   }
-//  if (CurrentKnob4 != prevKnob4) {
-//    usbMIDI.sendControlChange(CC8, CurrentKnob4, channel);
-//    prevKnob4 = CurrentKnob4;
-//  }
+  if (CurrentKnob4 != prevKnob4) {
+    usbMIDI.sendControlChange(CC8, CurrentKnob4, channel);
+    prevKnob4 = CurrentKnob4;
+  }
 
-delay(50);
+  delay(50);
 
   // MIDI Controllers should discard incoming MIDI messages.
   // http://forum.pjrc.com/threads/24179-Teensy-3-Ableton-Analog-CC-causes-midi-crash
@@ -82,3 +86,6 @@ delay(50);
     // ignore incoming messages
   }
 }
+
+
+

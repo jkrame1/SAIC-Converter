@@ -1,6 +1,7 @@
 // DAC Verification Test
 #include <SPI.h>
 
+
 //One DAC is wired up to have chip select to Teensy digital pin 1
 //the other to Teensy 2
 int chip_select = 1;
@@ -22,6 +23,7 @@ void setup() {
   SPI.begin();
   SPI.setMOSI(7);
   SPI.setSCK(14);
+  Serial.begin(115200);
 
 }
 
@@ -33,10 +35,10 @@ void loop() {
 //same time
 
   for (int i = 0; i < 4096; i ++) {
-  MCP4922_write(chip_select, 0, i); //2
-  MCP4922_write(chip_select, 1, i); //4
-  MCP4922_write(chip_select2, 0, i); //3
-  MCP4922_write(chip_select2, 1, i); //1
+  MCP4922_write(chip_select, 0, i);  //OUTPUT 2
+  MCP4922_write(chip_select, 1, i);  //OUTPUT 4
+  MCP4922_write(chip_select2, 0, i); //OUTPUT 3
+  MCP4922_write(chip_select2, 1, i); //OUTPUT 1
   delay(1);
   }
 }

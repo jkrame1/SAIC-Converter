@@ -2,20 +2,20 @@
 /*
 
   CV Inputs are mapped to corresponiding outputs
-       ->  (PIN A2)
-  **   ->  (PIN A3)
-  ***  ->  (PIN A6)
-  **** ->  (PIN A7)
+  *    ->  (PIN A7)
+  **   ->  (PIN A6)
+  ***  ->  (PIN A3)
+  **** ->  (PIN A2)
 
   Knobs are mapped to corresponiding outputs
-       ->  (PIN A12)
+  *    ->  (PIN A12)
   **   ->  (PIN A13)
-  ***  ->  (PIN A10)
-  **** ->  (PIN A11)
+  ***  ->  (PIN A11)
+  **** ->  (PIN A10)
 
 
   CV Outputs have the following Functions
-       -> outputs scaled version of knob, input CV, or toggled full voltage for a trigger
+  *    -> outputs scaled version of knob, input CV, or toggled full voltage for a trigger
   **   -> outputs scaled version of knob, input CV, or toggled full voltage for a trigger
   ***  -> outputs scaled version of knob, input CV, or toggled full voltage for a trigger
   **** -> outputs scaled version of knob, input CV, or toggled full voltage for a trigger
@@ -33,8 +33,8 @@ const int channel = 1;
 
 const int knob1 = A12;
 const int knob2 = A13;
-const int knob3 = A10;
-const int knob4 = A11;
+const int knob3 = A11;
+const int knob4 = A10;
 
 const int CVin1 = A7;
 const int CVin2 = A6;
@@ -94,25 +94,25 @@ void loop() {
   //Read voltage on the CV Inputs and write the value to the CV Outputs
   in1 = analogRead(CVin1);
   scaledVal1 = map(in1, 0, 1023, 0, 4095);
-  // MCP4922_write(chip_select, 1, scaledVal1);  //Write DAC1, channel 1
+  // MCP4922_write(chip_select2, 1, scaledVal1);  //Write DAC OUT1
   Serial.print("CV1: ");
   Serial.println(scaledVal1);
 
   in2 = analogRead(CVin2);
   scaledVal2 = map(in2, 0, 1023, 0, 4095);
-  // MCP4922_write(chip_select, 0, scaledVal2);  //Write DAC1, channel 2
+  // MCP4922_write(chip_select, 0, scaledVal2);  //Write DAC OUT2
   Serial.print("CV2: ");
   Serial.println(scaledVal2);
 
   in3 = analogRead(CVin3);
   scaledVal3 = map(in3, 0, 1023, 0, 4095);
-  // MCP4922_write(chip_select2, 0, scaledVal3);  //Write DAC2, channel 1
+  //MCP4922_write(chip_select2, 0, scaledVal3);  //Write DAC OUT3
   Serial.print("CV3: ");
   Serial.println(scaledVal3);
 
   in4 = analogRead(CVin4);
   scaledVal4 = map(in4, 0, 1023, 0, 4095);
-  // MCP4922_write(chip_select2, 1, scaledVal4);  //Write DAC2, channel 2
+  // MCP4922_write(chip_select2, 1, scaledVal4);  //Write DAC OUT4
   Serial.print("CV4: ");
   Serial.println(scaledVal4);
 
@@ -121,13 +121,13 @@ void loop() {
   //Read voltage on the Knobs and write the value to the CV Outputs
   in5 = analogRead(knob1);
   scaledKnob1 = map(in5, 0, 1023, 0, 4095);
-  MCP4922_write(chip_select, 0, scaledKnob1);  //Write DAC1, channel 1
+  MCP4922_write(chip_select2, 1, scaledKnob1);  //Write DAC1, channel 1
   Serial.print("knob1: ");
   Serial.println(scaledKnob1);
 
   in6 = analogRead(knob2);
   scaledKnob2 = map(in6, 0, 1023, 0, 4095);
-  MCP4922_write(chip_select, 1, scaledKnob2);  //Write DAC1, channel 2
+  MCP4922_write(chip_select, 0, scaledKnob2);  //Write DAC1, channel 2
   Serial.print("knob2: ");
   Serial.println(scaledKnob2);
 
@@ -139,7 +139,7 @@ void loop() {
 
   in8 = analogRead(knob4);
   scaledKnob4 = map(in8, 0, 1023, 0, 4095);
-  MCP4922_write(chip_select2, 1, scaledKnob4);  //Write DAC2, channel 2
+  MCP4922_write(chip_select, 1, scaledKnob4);  //Write DAC2, channel 2
   Serial.print("knob4: ");
   Serial.println(scaledKnob4);
 
@@ -162,48 +162,6 @@ void MCP4922_write(int cs_pin, byte dac, int value) {
   SPI.transfer(low);
   digitalWrite(cs_pin, HIGH);
 }
-
-void DAC_Write(int chan, int value) {
-  if (chan == 1) {
-    byte low = value & 0xff;
-    byte high = (value >> 8) & 0x0f;
-    byte dac = (0 & 1) << 7;
-    digitalWrite(1, LOW);
-    SPI.transfer(dac | 0x30 | high);
-    SPI.transfer(low);
-    digitalWrite(1, HIGH);
-  }
-  if (chan == 2) {
-    byte low = value & 0xff;
-    byte high = (value >> 8) & 0x0f;
-    byte dac = (1 & 1) << 7;
-    digitalWrite(1, LOW);
-    SPI.transfer(dac | 0x30 | high);
-    SPI.transfer(low);
-    digitalWrite(1, HIGH);
-  }
-
-  if (chan == 3) {
-    byte low = value & 0xff;
-    byte high = (value >> 8) & 0x0f;
-    byte dac = (0 & 1) << 7;
-    digitalWrite(2, LOW);
-    SPI.transfer(dac | 0x30 | high);
-    SPI.transfer(low);
-    digitalWrite(2, HIGH);
-  }
-
-  if (chan == 4) {
-    byte low = value & 0xff;
-    byte high = (value >> 8) & 0x0f;
-    byte dac = (1 & 1) << 7;
-    digitalWrite(2, LOW);
-    SPI.transfer(dac | 0x30 | high);
-    SPI.transfer(low);
-    digitalWrite(2, HIGH);
-  }
-}
-
 
 
 

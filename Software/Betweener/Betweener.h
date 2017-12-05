@@ -102,8 +102,8 @@
 //analog inputs used for the 4 potentiometers/knobs
 #define KNOB1 12
 #define KNOB2 13
-#define KNOB3 10
-#define KNOB4 11
+#define KNOB3 11
+#define KNOB4 10
 
 
 
