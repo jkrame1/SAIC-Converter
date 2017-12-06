@@ -2,7 +2,7 @@
 
 /*
   Triggers all generate notes over USB MIDI
-       -> 60
+  *    -> 60
   **   -> 61
   ***  -> 62
   **** -> 63
