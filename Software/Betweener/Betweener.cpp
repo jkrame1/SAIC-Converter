@@ -23,8 +23,25 @@
 //Constructor.  This code is run when you make a Betweener object.
 Betweener::Betweener(void){
     
+    //starting defaults for the values representing analog inputs and knob setttings
+    currentCV1=-1;
+    currentCV2=-1;
+    currentCV3=-1;
+    currentCV4=-1;
     
-    //All of the upper-case "variables" here are actually
+    currentKnob1=-1;
+    currentKnob2=-1;
+    currentKnob3=-1;
+    currentKnob4=-1;
+
+
+}
+    
+
+void Betweener::begin(void){
+    //this does all the real setup stuff
+    
+    //Note that al of the upper-case "variables" here are actually
     //defined in preprocessor directives in the .h file.
     //They cannot be modified at run time.
     
@@ -64,23 +81,31 @@ Betweener::Betweener(void){
     trig4.attach(TRIGGER_INPUT4);
     trig4.interval(bounce_ms);
  
-    //starting defaults for the values representing analog inputs and knob setttings
-    currentCV1=-1;
-    currentCV2=-1;
-    currentCV3=-1;
-    currentCV4=-1;
 
-    currentKnob1=-1;
-    currentKnob2=-1;
-    currentKnob3=-1;
-    currentKnob4=-1;
     
     //Start the ticker timers
     msecTickerCVRead = 0;
     msecTickerTrigger = 0;
     msecTickerMIDI = 0;
+
     
+    //If we are using DIN MIDI I/O we need some setup:
+#ifdef DODINMIDI
+    Serial2.setRX(DINMIDIIN);
+    Serial2.setTX(DINMIDIOUT);
+    DINMIDI.begin(MIDI_CHANNEL_OMNI);  //monitor all input channels
+#endif
+    
+    //If we are using digipots, we need to be running the Wire library
+#ifdef DODIGIPOTS
+    Wire.begin();
+#endif
+  
 }
+
+
+
+
 
 void Betweener::readTriggers(void){
     //The bounce library has a function update() that is the
@@ -94,25 +119,18 @@ void Betweener::readTriggers(void){
 
 
 void Betweener::readCVInputs(void){
-    //the commented-out bits here could be used to limit
-    //the read rate, assuming that what you want is to
-    //then do something like write MIDI outputs.
-    //but probably this kind of timing should be controlled
-    //in your sketch
-    
-    
-//    if (msecTickerCVRead >= analog_read_delta){
-//        msecTickerCVRead = 0;  //reset
+    //we could put stuff in hear to limit the read
+    //rate, but right now we'll leave that to the sketch
         currentCV1 = analogRead(ANALOG1);
         currentCV2 = analogRead(ANALOG2);
         currentCV3 = analogRead(ANALOG3);
         currentCV4 = analogRead(ANALOG4);
-//    }
+
 }
 
 
 void Betweener::readKnobs(void){
-    //do we want a ticker here, to limit the reading rate?
+ 
     currentKnob1 = analogRead(KNOB1);
     currentKnob2 = analogRead(KNOB2);
     currentKnob3 = analogRead(KNOB3);
@@ -126,12 +144,27 @@ void Betweener::readUsbMIDI(void) {
     
 }
 
+
+#ifdef DODINMIDI
+void Betweener::readDINMIDI(void){
+
+        DINMIDI.read();
+}
+#endif
+
+
+
+
+
 void Betweener::readAllInputs(void){
     //run the previous four functions all in sequence
     readTriggers();
     readCVInputs();
     readKnobs();
     readUsbMIDI();
+#ifdef DODINMIDI
+    readDINMIDI();
+#endif
 }
 
 void Betweener::readTrigger(int channel){
@@ -149,7 +182,9 @@ void Betweener::readTrigger(int channel){
             trig4.update();
             break;
         default:
-            //stick in some kind of error handling here
+            //we shouldn't get here unless you gave an incorrect value
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+        
             break;
         
     }
@@ -175,9 +210,9 @@ void Betweener::readCVInput(int channel){
 
             break;
         default:
-            //stick in some kind of error handling here
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
             break;
-            
+
     }
 }
 
@@ -202,7 +237,7 @@ void Betweener::readKnob(int channel){
             
             break;
         default:
-            //stick in some kind of error handling here
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
             break;
             
     }
@@ -232,7 +267,7 @@ int Betweener::readCVInputMIDI(int channel){
             
             break;
         default:
-            //stick in some kind of error handling here
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
             break;
             
     }
@@ -265,7 +300,7 @@ int Betweener::readKnobMIDI(int channel){
             
             break;
         default:
-            //stick in some kind of error handling here
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
             break;
             
     }
@@ -278,6 +313,8 @@ int Betweener::readKnobMIDI(int channel){
 
     
 int Betweener::CVtoMIDI(int val){
+    //CV inputs are 10 bit (range 0-1023)
+    //midi CC values go from 0 to 127
     int midival = map(val, 0, 1023, 0, 127);
     return midival;
     
@@ -285,6 +322,8 @@ int Betweener::CVtoMIDI(int val){
 
 
 int Betweener::MIDItoCV(int val){
+    //midi CC values go from 0 to 127
+    //CV outs are 12 bit (range 0-4095)
     int cvval = map(val, 0, 127, 0, 4095);
     return cvval;
     
@@ -292,12 +331,12 @@ int Betweener::MIDItoCV(int val){
 
 
 int Betweener::KnobToMIDI(int val){
+    //knob inputs are 10 bit (range 0-1023)
+    //midi CC values go from 0 to 127
     int midival = map(val, 0, 1023, 0, 127);
     return midival;
     
 }
-
-
 
 
 
@@ -314,6 +353,16 @@ void Betweener::MCP4922_write(int cs_pin, byte dac, int value){
     digitalWrite(cs_pin, HIGH);
 }
 
+#ifdef DODIGIPOTS
+void Betweener::AD5241_write(byte address, int value){
+    
+
+    Wire.beginTransmission(address); // transmit to device address
+    Wire.write(byte(0x00));            // sends instruction byte
+    Wire.write(value);             // sends potentiometer value byte
+    Wire.endTransmission();     // stop transmitting
+}
+#endif
 
 void Betweener::writeCVOut(int value, int cvout){
     int cs_pin = -1;
@@ -336,7 +385,7 @@ void Betweener::writeCVOut(int value, int cvout){
             dac=CVIN4_DAC_CHANNEL;
             break;
         default:
-            //stick in some kind of error handling here
+            DEBUG_PRINTLN("you are trying to write to a nonexistent CV channel!");
             break;
        
     }
@@ -345,4 +394,33 @@ void Betweener::writeCVOut(int value, int cvout){
     
     MCP4922_write(cs_pin, dac,value);
 }
+
+#ifdef DODIGIPOTS
+void Betweener::writeDigipotOut(int value, int digipot){
+    byte addr = -1;
+
+    switch (digipot){
+        case 1:
+            addr = DIGIPOTADDR1;
+            break;
+        case 2:
+            addr = DIGIPOTADDR2;
+            break;
+        case 3:
+            addr = DIGIPOTADDR3;
+            break;
+        case 4:
+            addr = DIGIPOTADDR4;
+            break;
+        default:
+            DEBUG_PRINTLN("you are trying to write to a nonexistent digipot channel!");
+        break;
+        
+    }
+    
+    //should put in some idiot checks here that the value is reasonable...
+    
+    AD5241_write(addr,value);
+}
+#endif
 

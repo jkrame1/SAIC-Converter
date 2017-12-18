@@ -8,10 +8,10 @@
 //
 //  The purpose of the Betweener class is to set up the software mappings
 //  that enable Teensy to communicate via the soldered-together connections
-//  on the whatever-it's-called device itself.
+//  on the Betweener device itself.
 //
 //  The Betweener class also includes functions that allow a
-//  relatively streamlined set of read/write operations so that the
+//  slightly streamlined set of read/write operations so that the
 //  device can mediate between CV inputs and outputs, MIDI inputs and
 //  outputs, and trigger inputs.
 //
@@ -28,12 +28,11 @@
 //
 //  CHANGE LOG:
 //  10/23/17 Created by kathryn schaffer (ks)
-//
+//  12/12/17 MIDI DIN and digipot support added, plus minimal error checking
 //
 //
 //
 //  TO DO:
-//     Error handling
 //     Implement optional serial output to be used for debugging/monitoring
 //     Make versions of the read functions that read single channels
 //     Put in idiot-checks on values sent to be written out
@@ -53,8 +52,13 @@
 //Here is where we include all the other Arduino libraries that this
 //depends on.  We're using the updated "Bounce2" library because it
 //is more compatible with being used in other libraries
+#include <Arduino.h>
 #include <SPI.h>
 #include <Bounce2.h>
+#include <MIDI.h>
+#include <Wire.h>
+//note that Wire.h is included down below if we end up using digipots
+//but we don't bother with it otherwise
 
 
 //This is where we define hard-wired pin associations.
@@ -106,6 +110,45 @@
 #define KNOB4 10
 
 
+//use this flag to decide whether to make use of DIN midi or not
+//if you want it, keep the line in the code.  Otherwise, comment it out.
+//Note that if you  use MIDI DIN, you will need
+//the updated MIDI library for Teensy, from here:
+//https://github.com/FortySevenEffects/arduino_midi_library
+//and you will need to delete the default MIDI.h file that
+//is included in the Arduino package.
+#define DODINMIDI
+
+
+//If we do choose to use hardware MIDI, these will be
+//the pins.  Alternate pins for Serial2.  See:
+//https://www.pjrc.com/teensy/td_uart.html
+#define DINMIDIIN 26
+#define DINMIDIOUT 31
+
+//use this flag to decide whether to make use of digipots connected
+//via I2C.  comment out the flag to not use digipots (saves a little bit of code)
+#define DODIGIPOTS
+
+//digipot address bytes for four digipot outputs
+#define DIGIPOTADDR1 44
+#define DIGIPOTADDR2 45
+#define DIGIPOTADDR3 46
+#define DIGIPOTADDR4 46
+
+//If you want the code to give you some error messages in the
+//serial monitor, leave the line below. Otherwise, comment it out.
+#define DEBUG  //leave this line in to have automatic error printouts to Serial monitor
+//this little "preprocessor macro" (which is like a function but processed at a different time)
+//will be used to print the debug info.  See examples in the .cpp file for how this gets used.
+#ifdef DEBUG
+#define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
+#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...)
+#define DEBUG_PRINTLN(...)
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////////
 //Now we define the Betweener class, which will let us make Betweener objects
@@ -136,7 +179,10 @@ class Betweener
     public:  //declares the following functions and variables to be available to users
     
     Betweener();  //constructor; does all setup and initialization stuff
-
+    void begin(void); //starts up all the other objects this depends on
+    
+    
+    
     ////////////////////////
     // INPUT FUNCTIONS
     // You have the choice of manually asking the device to read the various
@@ -146,6 +192,9 @@ class Betweener
     void readCVInputs(void); //reads analog inputs (CV inputs)
     void readKnobs(void);  //reads potentiometer inputs
     void readUsbMIDI(void);  //reads MIDI via the usbMIDI arduino functionality
+#ifdef DODINMIDI
+    void readDINMIDI(void);  //reads MIDI via the 5-pin DIN connector
+#endif
     
     void readAllInputs(void); //reads triggers, CV, knobs, and USB MIDI inputs, in that order
     
@@ -161,14 +210,13 @@ class Betweener
     int readKnobMIDI(int channel);
     
     
-    
     /////////////////////////
     //BASIC OUTPUT FUNCTIONS
     //These functions assume you are using your sketch to decide directly what
     //output to write.  The functions are mainly useful for just hiding some of the
     //messier logic required by the specific DAC chip, etc.
     void writeCVOut(int value, int cvout); //value is in range 0-4095; cvout selects channel 1 through 4
-    
+    void writeDigipotOut(int value, int digipot); //value is in range 0-255; digipot is 1 through 4
     
     //these are "set" and "get" functions that let the user check and change internal state parameters
     void setBounceMillisec(int millisec){bounce_ms = millisec;};
@@ -179,6 +227,9 @@ class Betweener
     //they can be accessed via Betweener::receivedNoteOn(...) etc.
     static void MCP4922_write(int cs_pin, byte dac, int value);
 
+#ifdef DODIGIPOTS
+    static void AD5241_write(byte address, int value);
+#endif
     
     //Scaling and conversion functions.  You can use these directly
     //and they are also used by some of the read functions
@@ -187,11 +238,7 @@ class Betweener
     int KnobToMIDI(int val);
     
     
-    
-    
-    
-    
-    // variables that are used by these functions:
+    // ticker variables (not currently used anywhere, but available if need be)
     elapsedMillis msecTickerCVRead;  //ticker for elapsed time since last analog read
     elapsedMillis msecTickerTrigger; //ticker for elapsed time since last trigger
     elapsedMillis msecTickerMIDI; //ticker for elapsed time since last MIDI read
@@ -219,6 +266,13 @@ class Betweener
     Bounce trig4;
     
     
+    //midi interface.  Don't freak out about how weird this looks.  It's just necessary.
+    //note that we are going to remap the Serial2 pins and using those for DIN MIDI IO.
+    //Also we only do this if we are going to compile the hardware MIDI stuff
+#ifdef DODINMIDI
+    midi::MidiInterface<HardwareSerial> DINMIDI = midi::MidiInterface<HardwareSerial>((HardwareSerial&)Serial2);
+#endif
+
     
     //the "private" parts of the Betweener class are the interior guts - the ways
     //that the class manages some of the functionality of the device internally.
