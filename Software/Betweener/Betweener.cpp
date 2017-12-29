@@ -305,12 +305,45 @@ int Betweener::readKnobMIDI(int channel){
             
     }
     //convert it and return it:
-    return KnobToMIDI(val);
+    return knobToMIDI(val);
     
     
 }
 
 
+
+int Betweener::readKnobCV(int channel){
+    //first update the value stored for the selected channel
+    readKnob(channel);
+    int val=-1;
+    //grab the value
+    switch (channel){
+        case 1:
+            val=currentKnob1;
+            
+            break;
+        case 2:
+            val=currentKnob2;
+            
+            break;
+        case 3:
+            val=currentKnob3;
+            
+            break;
+        case 4:
+            val=currentKnob4;
+            
+            break;
+        default:
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+            break;
+            
+    }
+    //convert it and return it:
+    return knobToCV(val);
+    
+    
+}
     
 int Betweener::CVtoMIDI(int val){
     //CV inputs are 10 bit (range 0-1023)
@@ -330,7 +363,7 @@ int Betweener::MIDItoCV(int val){
 }
 
 
-int Betweener::KnobToMIDI(int val){
+int Betweener::knobToMIDI(int val){
     //knob inputs are 10 bit (range 0-1023)
     //midi CC values go from 0 to 127
     int midival = map(val, 0, 1023, 0, 127);
@@ -338,6 +371,12 @@ int Betweener::KnobToMIDI(int val){
     
 }
 
+int Betweener::knobToCV(int val){
+    //knob inputs are 10 bit (range 0-1023)
+    //CV outs are 12 bit (range 0-4095)
+    int cvval = map(val,0,1023,0,4095);
+    return cvval;
+}
 
 
 

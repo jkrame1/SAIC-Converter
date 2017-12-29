@@ -208,7 +208,7 @@ class Betweener
     //CV and knob inputs for MIDI output
     int readCVInputMIDI(int channel);
     int readKnobMIDI(int channel);
-    
+    int readKnobCV(int channel);
     
     /////////////////////////
     //BASIC OUTPUT FUNCTIONS
@@ -235,7 +235,8 @@ class Betweener
     //and they are also used by some of the read functions
     int CVtoMIDI(int val);
     int MIDItoCV(int val);
-    int KnobToMIDI(int val);
+    int knobToMIDI(int val);
+    int knobToCV(int val);
     
     
     // ticker variables (not currently used anywhere, but available if need be)
