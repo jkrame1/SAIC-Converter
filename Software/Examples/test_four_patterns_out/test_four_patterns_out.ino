@@ -7,7 +7,7 @@ Betweener b;
 
 //one pattern per CV out.  Somewhat arbitrary choices for testing
 Pattern p1(3, 6, 500); //3 seconds, 6 segments, dt of 500ms
-Pattern p2(2, 6, 50); //1 second, 5 segments, dt of 50ms
+Pattern p2(2, 6, 50); //2 seconds, 6 segments, dt of 50ms
 Pattern p3(2, 1, 50); //2 seconds, 1 segment, dt of 50ms
 Pattern p4(3,8,100);  //3 seconds, 8 segments, dt 100ms
 
@@ -40,8 +40,8 @@ void setup() {
   p2.printToSerial();
   Serial.println("pattern 3");
   p3.printToSerial();
- // Serial.println("pattern 4");
- // p4.printToSerial();
+  Serial.println("pattern 4");
+  p4.printToSerial();
   
 
 }
