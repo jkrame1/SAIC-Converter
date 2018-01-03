@@ -12,7 +12,6 @@
 /**SET LIBRARIES**/
 
 #include <Betweener.h>
-#include <Wire.h>
 
 Betweener b;
 
@@ -50,27 +49,27 @@ void setup() {
 
 void loop() {
 
-  b.readAllInputs();
+  b.readTriggers();
 
   //  clock input on trig 4 edge
   //  push CV + gate count forward 1
   clockCount();
 
   //  on trig 1 edge randomize CV sequencer
-  if (b.trig1.fallingEdge()) {
+  if (b.trig1.fell()) {
     Serial.println("trig 1");
     randomizeCVseq();
   }
 
   //  on trig 2 edge randomize gate sequencer
-  if (b.trig2.fallingEdge()) {
+  if (b.trig2.fell()) {
     Serial.println("trig 2");
     randomizeGateSeq();
 
   }
 
   //  on trig 3 edge set clock back to 0
-  if (b.trig3.fallingEdge()) {
+  if (b.trig3.fell()) {
     Serial.println("trig 3");
     CVseqCount = 0;
     gateSeqCount = 0;
@@ -89,7 +88,7 @@ void loop() {
 //  step clock count forward on rising trigger edge
 void clockCount() {
 
-  if (b.trig4.fallingEdge()) {
+  if (b.trig4.fell()) {
     Serial.println("trig 4");
     if (CVseqCount < CVseqL) {
       CVseqCount++;
@@ -117,7 +116,7 @@ void randomizeCVseq() {
   int CV3 = b.readKnobCV(4);
 
   for (int i = 0; i <= 15; i++) {
-    int sel;
+    int sel = 0;
     int r = random(4);
 
     if (r == 0) {
@@ -139,13 +138,12 @@ void randomizeCVseq() {
 void randomizeGateSeq() {
 
   for (int i = 0; i <= 15; i++) {
-    float rF = random(2);
-    if (rF == 1) {
-      rF = 4095;
+    int r = random(2);
+    if (r == 1) {
+      r = 4095;
     }
-    int rI = (int) rF;
 
-    gateSequence[i] = rI;
+    gateSequence[i] = r;
   }
 }
 
