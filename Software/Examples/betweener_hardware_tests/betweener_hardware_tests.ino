@@ -25,7 +25,7 @@ void setup() {
   //the Betweener begin function is necessary before it will do anything
   b.begin();
   printMenu();
-
+pinMode(8, OUTPUT);
 }
 
 //variable to store the keyboard input from the user
@@ -41,8 +41,7 @@ void loop() {
     while(Serial.available()){
       Serial.read();
     }
-
-
+digitalWrite(8, HIGH);
     //based on the user selection, different functions
     //will be run
     switch (selection){
@@ -82,9 +81,9 @@ void loop() {
         //not just 'q', as this is the default response...
         printMenu();
         break;
-
      }
-
+     
+digitalWrite(8, LOW);
   }
 
 
@@ -202,8 +201,8 @@ void rampCVOuts(){
     Serial.println(i);
     Serial.println(i);
     Serial.println(i);
-    i=i+100;
-    delay(250);
+    i=i+5;
+    delay(2);
     if (i >= maxval){
       i = 0;
     }
@@ -267,7 +266,7 @@ void knobsToCV(){
     Serial.println(String("Writing value ")+val3+String(" to CV 3"));
     Serial.println(String("Writing value ")+val4+String(" to CV 4"));
     
-    delay(250);
+    delay(25);
     
   }
 }
