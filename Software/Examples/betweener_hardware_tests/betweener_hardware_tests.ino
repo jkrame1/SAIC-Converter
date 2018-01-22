@@ -1,11 +1,11 @@
 
 //This is a simple hardware test sketch that uses the Serial monitor as a menu interface
-//for trying out the main functionality of the Betweener device.  You will need to have the 
-//Betweener library to compile this sketch.  Ensure there is a folder called Betweener in your 
+//for trying out the main functionality of the Betweener device.  You will need to have the
+//Betweener library to compile this sketch.  Ensure there is a folder called Betweener in your
 // Arduino 'libraries' folder, and that it contains Betweener.h and Betweener.cpp
 
-// Then, note that this code will not do anything until you open the Serial monitor and 
-// make sure it's set to the right baud rate (115200).  Hit any key on your computer and it will 
+// Then, note that this code will not do anything until you open the Serial monitor and
+// make sure it's set to the right baud rate (115200).  Hit any key on your computer and it will
 // give you menu options for testing the Betweener functionality
 
 #include <Betweener.h>
@@ -19,13 +19,14 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println("Press any key and hit send (or return) to begin.");
-  while (!Serial.available()){
+  while (!Serial.available()) {
     //Do nothing until something is received over the serial port
   }
   //the Betweener begin function is necessary before it will do anything
   b.begin();
   printMenu();
-pinMode(8, OUTPUT);
+
+  pinMode(8, OUTPUT); //set Betweener LED Pin to output.
 }
 
 //variable to store the keyboard input from the user
@@ -33,18 +34,19 @@ int selection;
 
 void loop() {
   //wait for the user to input something and then grab it
-  if (Serial.available()){
+  if (Serial.available()) {
     //grab first character that was input
-    selection=Serial.read();
-    //any other characters that were input are extras (e.g. newlines) so 
+    selection = Serial.read();
+    //any other characters that were input are extras (e.g. newlines) so
     //we read them just to flush them from the input buffer
-    while(Serial.available()){
+    while (Serial.available()) {
       Serial.read();
     }
-digitalWrite(8, HIGH);
+    digitalWrite(8, HIGH);  //toggle LED on when in a test mode.
+    
     //based on the user selection, different functions
     //will be run
-    switch (selection){
+    switch (selection) {
       case '1':
         Serial.println("you entered 1.  Testing knobs.");
         printKnobValues();
@@ -53,7 +55,7 @@ digitalWrite(8, HIGH);
         Serial.println("you entered 2.  Testing triggers.");
         printTriggers();
         break;
-      case '3': 
+      case '3':
         Serial.println("you entered 3.  Testing CV inputs.");
         printCVInputs();
         break;
@@ -77,19 +79,19 @@ digitalWrite(8, HIGH);
         printMenu();
         break;
       default:
-        //actually, you can type any key to get back to the menu, 
+        //actually, you can type any key to get back to the menu,
         //not just 'q', as this is the default response...
         printMenu();
         break;
-     }
-     
-digitalWrite(8, LOW);
+    }
+
+    digitalWrite(8, LOW); //Toggle LED off when not in a test mode
   }
 
 
 }
 
-void printMenu(){
+void printMenu() {
   Serial.println("=======================");
   Serial.println("Betweener tests.  Select from the menu below to begin a test.");
   Serial.println("Send letter q to stop the test and return to this menu.");
@@ -107,11 +109,11 @@ void printMenu(){
 
 }
 
-void printKnobValues(){
- 
+void printKnobValues() {
+
   //as long as the user has not entered something in the serial monitor window,
   //we will read and print knob values
-  while (!Serial.available()){
+  while (!Serial.available()) {
     //the function below just reads knobs.
     //we could also use b.readAllInputs() and it would work too.
     b.readKnobs();
@@ -126,50 +128,50 @@ void printKnobValues(){
   }
 }
 
-void printTriggers(){
-  while(!Serial.available()){
+void printTriggers() {
+  while (!Serial.available()) {
     //the function below reads just the triggers.  we could also do readAllInputs().
     b.readTriggers();
     //the triggers are Bounce objects and they have all the functions
-    //defined in that library, e.g. to test for a rising edge or 
-    //falling edge.  
-    if (b.trig1.risingEdge()){
+    //defined in that library, e.g. to test for a rising edge or
+    //falling edge.
+    if (b.trig1.risingEdge()) {
       Serial.println("Rising edge on trigger 1");
     }
-    if (b.trig1.fallingEdge()){
+    if (b.trig1.fallingEdge()) {
       Serial.println("Falling edge on trigger 1");
     }
-    if (b.trig2.risingEdge()){
+    if (b.trig2.risingEdge()) {
       Serial.println("Rising edge on trigger 2");
     }
-    if (b.trig2.fallingEdge()){
+    if (b.trig2.fallingEdge()) {
       Serial.println("Falling edge on trigger 2");
     }
-    if (b.trig3.risingEdge()){
+    if (b.trig3.risingEdge()) {
       Serial.println("Rising edge on trigger 3");
     }
-    if (b.trig3.fallingEdge()){
+    if (b.trig3.fallingEdge()) {
       Serial.println("Falling edge on trigger 3");
     }
-    if (b.trig4.risingEdge()){
+    if (b.trig4.risingEdge()) {
       Serial.println("Rising edge on trigger 4");
     }
-    if (b.trig4.fallingEdge()){
+    if (b.trig4.fallingEdge()) {
       Serial.println("Falling edge on trigger 4");
     }
-    delay(100);    
+    delay(100);
   }
 
 }
 
-void printCVInputs(){
+void printCVInputs() {
 
   //as long as the user is not inputting anything from the keyboard,
   //we will read and print CV values with some delay
-  while(!Serial.available()){
+  while (!Serial.available()) {
     //read CV inputs.  we could also use readAllInputs() here.
-    b.readCVInputs(); 
-    //now the current CV values are stored in the betweener class, and 
+    b.readCVInputs();
+    //now the current CV values are stored in the betweener class, and
     //we can grab them and print them
 
     Serial.println("Current CV input values:");
@@ -182,14 +184,14 @@ void printCVInputs(){
   }
 }
 
-void rampCVOuts(){
+void rampCVOuts() {
   //the range of the CV outs is 0 to 4095
-  int maxval=4095;
-  int i=0;
+  int maxval = 4095;
+  int i = 0;
 
-  //as long as the user does not input anything, we will ramp the 
+  //as long as the user does not input anything, we will ramp the
   //CV outs all together
-  while(!Serial.available()){
+  while (!Serial.available()) {
     //write the same value out to each channel
     b.writeCVOut(i, 1);
     b.writeCVOut(i, 2);
@@ -201,73 +203,73 @@ void rampCVOuts(){
     Serial.println(i);
     Serial.println(i);
     Serial.println(i);
-    i=i+5;
+    i = i + 5;
     delay(2);
-    if (i >= maxval){
+    if (i >= maxval) {
       i = 0;
     }
   }
-  
+
 }
 
-void printDINMIDI(){
-   //as long as the user has not input anything, print some information from incoming MIDI messages
-   while(!Serial.available()){
+void printDINMIDI() {
+  //as long as the user has not input anything, print some information from incoming MIDI messages
+  while (!Serial.available()) {
     //see documentation for the Arduino MIDI library to understand what these functions are doing
-    if(b.DINMIDI.read()){
-      Serial.println(String("MIDI message type:  ")+b.DINMIDI.getType()+String(" with data values: ")+b.DINMIDI.getData1()+String(" and ")+b.DINMIDI.getData2());
+    if (b.DINMIDI.read()) {
+      Serial.println(String("MIDI message type:  ") + b.DINMIDI.getType() + String(" with data values: ") + b.DINMIDI.getData1() + String(" and ") + b.DINMIDI.getData2());
     }
-    
-   }
+
+  }
 
 
-  
+
 }
 
-void rampMIDICC(){
+void rampMIDICC() {
   //here we're going to take MIDI CC channel 10 and ramp it
   //from 0 to 127 (on MIDI channel 1)
-  int i=0;
-  int cc_channel=10;
-  int midi_channel=1;
+  int i = 0;
+  int cc_channel = 10;
+  int midi_channel = 1;
   int max = 127;
-  
-  while(!Serial.available()){
-    b.DINMIDI.sendControlChange(i,cc_channel,midi_channel);
-    Serial.println(String("Sending this value to MIDI CC channel 10: ")+i);
+
+  while (!Serial.available()) {
+    b.DINMIDI.sendControlChange(i, cc_channel, midi_channel);
+    Serial.println(String("Sending this value to MIDI CC channel 10: ") + i);
     delay(500);
-    i=i+1;
-    if (i == max){
-      i = 0;      
+    i = i + 1;
+    if (i == max) {
+      i = 0;
     }
   }
 }
 
-void knobsToCV(){
-  //as long as the user does not interrupt with a keyboard input, take 
+void knobsToCV() {
+  //as long as the user does not interrupt with a keyboard input, take
   //knob settings and scale them and output them
-  while(!Serial.available()){
-    //the betweener library has a function that reads a knob value and returns that 
-    //value scaled to the right range for CV outs.  We then just write that to the 
+  while (!Serial.available()) {
+    //the betweener library has a function that reads a knob value and returns that
+    //value scaled to the right range for CV outs.  We then just write that to the
     //channel we want.
-    int val1=b.readKnobCV(1);
-    int val2=b.readKnobCV(2);
-    int val3=b.readKnobCV(3);
-    int val4=b.readKnobCV(4);
-   
-    b.writeCVOut(val1,1);
-    b.writeCVOut(val2,2);
-    b.writeCVOut(val3,3);
-    b.writeCVOut(val4,4);
+    int val1 = b.readKnobCV(1);
+    int val2 = b.readKnobCV(2);
+    int val3 = b.readKnobCV(3);
+    int val4 = b.readKnobCV(4);
+
+    b.writeCVOut(val1, 1);
+    b.writeCVOut(val2, 2);
+    b.writeCVOut(val3, 3);
+    b.writeCVOut(val4, 4);
 
     //print out to serial just for reassurance
-    Serial.println(String("Writing value ")+val1+String(" to CV 1"));
-    Serial.println(String("Writing value ")+val2+String(" to CV 2"));
-    Serial.println(String("Writing value ")+val3+String(" to CV 3"));
-    Serial.println(String("Writing value ")+val4+String(" to CV 4"));
-    
+    Serial.println(String("Writing value ") + val1 + String(" to CV 1"));
+    Serial.println(String("Writing value ") + val2 + String(" to CV 2"));
+    Serial.println(String("Writing value ") + val3 + String(" to CV 3"));
+    Serial.println(String("Writing value ") + val4 + String(" to CV 4"));
+
     delay(25);
-    
+
   }
 }
 
