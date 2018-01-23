@@ -4,9 +4,6 @@ Betweener b;
 
 // the MIDI channel number to send messages
 const int channel = 1;
-int chip_select = 1;
-int chip_select2 = 2;
-
 
 // create variables to store current and previous values of knobs and CV Inputs
 int  CurrentCV1, CurrentCV2, CurrentCV3, CurrentCV4 = -1;
@@ -25,7 +22,9 @@ int CC7 = 26;
 int CC8 = 27;
 
 void setup() {
-  // put your setup code here, to run once:
+  //the Betweener begin function is necessary before it will
+  //do anything
+  b.begin();
   Serial.begin(115200);
 }
 
