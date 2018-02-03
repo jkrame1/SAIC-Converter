@@ -1,7 +1,7 @@
 
-const int touchPin1 = 32;  // touch input pin that the electrode is attached to
-const int touchPin2 = 25;  // touch input pin that the electrode is attached to
-const int touchPin3 = 33;  // touch input pin that the electrode is attached to
+const int touchPin1 = 32;  // touch input pin attached to the electrode 
+const int touchPin2 = 25;  // touch input pin attached to the electrode 
+const int touchPin3 = 33;  // touch input pin attached to the electrode 
 
 int sensorValue1 = 0;        // value read from the touch tab
 int sensorValue2 = 0;        // value read from the touch tab
