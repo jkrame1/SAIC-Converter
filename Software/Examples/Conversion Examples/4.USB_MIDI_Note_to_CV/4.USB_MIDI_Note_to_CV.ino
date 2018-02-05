@@ -2,7 +2,7 @@
 //USB_MIDI_Note_to_CV
 //
 //This code receives MIDI over USB from a computer and generates Control Voltages
-//on the four Betweener outputs. 
+//on the four Betweener outputs.
 //  1 Note to CV - this is NOT 1v/oct - just a rough mapping of all notes to full CV range
 //  2 Gate - High for Note On Messages and Low for Note Off messages (or velocity of 0)
 //  3 Velocity CV - very wide range, can be remapped in NOTE ON function below
@@ -23,11 +23,15 @@ const int channel = 1;
 
 
 void setup() {
-  b.begin();
+  b.begin();  //start the Betweener
+
   Serial.begin(115200);
+
   usbMIDI.setHandleNoteOff(OnNoteOff);
   usbMIDI.setHandleNoteOn(OnNoteOn);
   usbMIDI.setHandleAfterTouch(OnAfterTouch);
+
+  pinMode(8, OUTPUT); // Set Pin 8, attached to the Betweener LED, to an Output
 }
 
 
@@ -47,10 +51,11 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
 
   if (velocity == 0) {
     b.writeCVOut(0, 2); //When a note-off is received, write a gate LOW on output 2
+    digitalWrite(8, LOW); //turn LED off if no Gate is present
   }
   else {
     b.writeCVOut(4095, 2); //When a note-on is received, write a gate HIGH on output 2
-    digitalWrite(8, HIGH);
+    digitalWrite(8, HIGH); //turn LED On when a Note On message is received
   }
 
   int velocityCV = map(velocity, 0, 127, 10, 4095); //scale MIDI velocity values to 12bit range for CV output
@@ -61,7 +66,7 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
 //NOTE OFF - Sets Gate LOW on Channel 2 if a Note Off message is received
 void OnNoteOff(byte channel, byte note, byte velocity) {
   b.writeCVOut(0, 2); //When a note-off is received, write a gate LOW on output 2
-  digitalWrite(8, LOW);
+  digitalWrite(8, LOW); //Turn LED off when a Note Off is received
 }
 
 
