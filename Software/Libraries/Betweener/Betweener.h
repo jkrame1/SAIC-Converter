@@ -19,18 +19,13 @@
 //  by users with little coding experience, and is thus obsessively
 //  commented with that audience in mind.
 //
-//  Basic examples for using this code are in a sketch
-//  entitled betweener_examples.ino
+//  To test the Betweener hardware and see examples of how to use this
+//  library, load and run the sketch betweener_hardware_tests.ino
 //
 //  REFERENCES AND CREDITS:
-//      (need to fill this out)
-//
-//
-//  CHANGE LOG:
-//  10/23/17 Created by kathryn schaffer (ks)
-//  12/12/17 MIDI DIN and digipot support added, plus minimal error checking
-//
-//
+//      Author:  Kathryn Schaffer, with Joseph Kramer
+//      Also using code snippets from:
+//          Sebastian Tomczak (MCP4922 write function)
 //
 //  TO DO:
 //     Implement optional serial output to be used for debugging/monitoring
@@ -57,8 +52,6 @@
 #include <Bounce2.h>
 #include <MIDI.h>
 #include <Wire.h>
-//note that Wire.h is included down below if we end up using digipots
-//but we don't bother with it otherwise
 
 
 //This is where we define hard-wired pin associations.
@@ -83,14 +76,14 @@
 #define DAC_CHIP_SELECT2 2
 //Identify the 4 CV outs with the right chip and DAC.
 //This is something that may change for different board versions.
-#define CVIN1_CHIP_SELECT 2
-#define CVIN1_DAC_CHANNEL 1
-#define CVIN2_CHIP_SELECT 1
-#define CVIN2_DAC_CHANNEL 0
-#define CVIN3_CHIP_SELECT 2
-#define CVIN3_DAC_CHANNEL 0
-#define CVIN4_CHIP_SELECT 1
-#define CVIN4_DAC_CHANNEL 1
+#define CVOUT1_CHIP_SELECT 2
+#define CVOUT1_DAC_CHANNEL 1
+#define CVOUT2_CHIP_SELECT 1
+#define CVOUT2_DAC_CHANNEL 0
+#define CVOUT3_CHIP_SELECT 2
+#define CVOUT3_DAC_CHANNEL 0
+#define CVOUT4_CHIP_SELECT 1
+#define CVOUT4_DAC_CHANNEL 1
 
 //Other pins used for inputs (which may change for different board versions)
 //digital pins used for trigger inputs
@@ -127,7 +120,7 @@
 #define DINMIDIOUT 31
 
 //use this flag to decide whether to make use of digipots connected
-//via I2C.  comment out the flag to not use digipots (saves a little bit of code)
+//via I2C.  Comment out the flag to not use digipots (saves a little bit of code)
 #define DODIGIPOTS
 
 //digipot address bytes for four digipot outputs
@@ -176,15 +169,15 @@ class Betweener
     //in user code. It also includes the functions you will use to make the
     //Betweener do what you want with reading, writing, etc.
     
-    public:  //declares the following functions and variables to be available to users
+    public:
     
-    Betweener();  //constructor; does all setup and initialization stuff
+    Betweener();  //constructor; initializes some Betweener-specific variables
     void begin(void); //starts up all the other objects this depends on
-    
     
     
     ////////////////////////
     // INPUT FUNCTIONS
+    // these are the functions for making the Betweener read inputs.
     // You have the choice of manually asking the device to read the various
     // types of input one at a time, or asking it to read all of them at once.
 
@@ -203,7 +196,6 @@ class Betweener
     void readCVInput(int channel);
     void readKnob(int channel);
 
-    
     //the functions below do some scaling and reduce jitter to prepare
     //CV and knob inputs for MIDI output
     int readCVInputMIDI(int channel);
@@ -224,7 +216,7 @@ class Betweener
     
     //static means that these functions can be accessed without necessarily having
     //a "Betweener" object available.  Just by including this library/class,
-    //they can be accessed via Betweener::receivedNoteOn(...) etc.
+    //they can be accessed via Betweener::MCP4922_write etc.
     static void MCP4922_write(int cs_pin, byte dac, int value);
 
 #ifdef DODIGIPOTS
@@ -238,13 +230,11 @@ class Betweener
     int knobToMIDI(int val);
     int knobToCV(int val);
     
-    
     // ticker variables (not currently used anywhere, but available if need be)
     elapsedMillis msecTickerCVRead;  //ticker for elapsed time since last analog read
     elapsedMillis msecTickerTrigger; //ticker for elapsed time since last trigger
     elapsedMillis msecTickerMIDI; //ticker for elapsed time since last MIDI read
 
-    
     // these are the variables we use to store current analog input readings,
     // updated whenever a read operation is performed
     int currentCV1;
@@ -267,8 +257,8 @@ class Betweener
     Bounce trig4;
     
     
-    //midi interface.  Don't freak out about how weird this looks.  It's just necessary.
-    //note that we are going to remap the Serial2 pins and using those for DIN MIDI IO.
+    //midi interface.  Don't freak out about how weird this looks.  Google c++ templates for more info.
+    //Note that we are going to remap the Serial2 pins and using those for DIN MIDI IO.
     //Also we only do this if we are going to compile the hardware MIDI stuff
 #ifdef DODINMIDI
     midi::MidiInterface<HardwareSerial> DINMIDI = midi::MidiInterface<HardwareSerial>((HardwareSerial&)Serial2);
@@ -282,11 +272,12 @@ class Betweener
     //function.
 
     
-    //Actually I am not sure this is the best place for these parameters... may rethink later
+    //right now this class is written so that almost everything is in the hands
+    //of the user.. We just have an internal Bounce related parameter with a default value
     private:
 
     int bounce_ms = 5;
-    uint analog_read_delta = 20;
+
   
     
 };
