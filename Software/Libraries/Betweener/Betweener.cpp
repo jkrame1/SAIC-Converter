@@ -38,7 +38,16 @@ Betweener::Betweener(void){
     currentKnob3=-1;
     currentKnob4=-1;
 
-
+    lastCV1=-1;
+    lastCV2=-1;
+    lastCV3=-1;
+    lastCV4=-1;
+    
+    lastKnob1=-1;
+    lastKnob2=-1;
+    lastKnob3=-1;
+    lastKnob4=-1;
+    
 }
     
 
@@ -126,6 +135,12 @@ void Betweener::readTriggers(void){
 void Betweener::readCVInputs(void){
     //we could put stuff in here to limit the read
     //rate, but right now we'll leave that to the sketch
+    
+    lastCV1 = currentCV1;
+    lastCV2 = currentCV2;
+    lastCV3 = currentCV3;
+    lastCV4 = currentCV4;
+        
     currentCV1 = analogRead(ANALOG1);
     currentCV2 = analogRead(ANALOG2);
     currentCV3 = analogRead(ANALOG3);
@@ -136,6 +151,11 @@ void Betweener::readCVInputs(void){
 
 void Betweener::readKnobs(void){
  
+    lastKnob1=currentKnob1;
+    lastKnob2=currentKnob2;
+    lastKnob3=currentKnob3;
+    lastKnob4=currentKnob4;
+    
     currentKnob1 = analogRead(KNOB1);
     currentKnob2 = analogRead(KNOB2);
     currentKnob3 = analogRead(KNOB3);
@@ -199,18 +219,22 @@ void Betweener::readTrigger(int channel){
 void Betweener::readCVInput(int channel){
     switch (channel){
         case 1:
+            lastCV1=currentCV1;
             currentCV1 = analogRead(ANALOG1);
 
             break;
         case 2:
+            lastCV2=currentCV2;
             currentCV2 = analogRead(ANALOG2);
 
             break;
         case 3:
+            lastCV3=currentCV3;
             currentCV3 = analogRead(ANALOG3);
 
             break;
         case 4:
+            lastCV4=currentCV4;
             currentCV4 = analogRead(ANALOG4);
 
             break;
@@ -226,18 +250,22 @@ void Betweener::readCVInput(int channel){
 void Betweener::readKnob(int channel){
     switch (channel){
         case 1:
+            lastKnob1=currentKnob1;
             currentKnob1 = analogRead(KNOB1);
             
             break;
         case 2:
+            lastKnob2=currentKnob2;
             currentKnob2 = analogRead(KNOB2);
             
             break;
         case 3:
+            lastKnob3=currentKnob3;
             currentKnob3 = analogRead(KNOB3);
             
             break;
         case 4:
+            lastKnob4=currentKnob4;
             currentKnob4 = analogRead(KNOB4);
             
             break;
@@ -247,6 +275,89 @@ void Betweener::readKnob(int channel){
             
     }
 }
+
+
+bool Betweener::knobChanged(int knob, float delta){
+    int current;
+    int last;
+    
+    switch(knob){
+        case 1:
+            current = currentKnob1;
+            last = lastKnob1;
+            break;
+        case 2:
+            current = currentKnob2;
+            last = lastKnob2;
+            break;
+        case 3:
+            current = currentKnob3;
+            last=lastKnob3;
+            break;
+        case 4:
+            current=currentKnob4;
+            last=lastKnob4;
+            
+            break;
+        default:
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+            current=0;  //just so we don't get some crazy values here...
+            last=0;
+            break;
+            
+    }
+    // max value for knobs is 1023
+    // this will be evaluated as a float and compared to floating point fraction
+    if ( abs(current - last)/1023. > delta){
+        return true;
+    }else{
+        return false;
+    }
+    
+}
+
+
+bool Betweener::CVChanged(int cv_channel, float delta){
+    int current;
+    int last;
+    
+    switch(cv_channel){
+        case 1:
+            current = currentCV1;
+            last = lastCV1;
+            break;
+        case 2:
+            current = currentCV2;
+            last = lastCV2;
+            break;
+        case 3:
+            current = currentCV3;
+            last=lastCV3;
+            break;
+        case 4:
+            current=currentCV4;
+            last=lastCV4;
+            
+            break;
+        default:
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+            current=0;  //just so we don't get some crazy values here...
+            last=0;
+            break;
+            
+    }
+    // max value for CV inputs is 1023
+    // this will be evaluated as a float and compared to floating point fraction
+    if ( abs(current - last)/1023. > delta){
+        return true;
+    }else{
+        return false;
+    }
+    
+}
+
+
+
 
 
 int Betweener::readCVInputMIDI(int channel){

@@ -196,6 +196,16 @@ class Betweener
     void readCVInput(int channel);
     void readKnob(int channel);
 
+    //functions that return true if the value has changed since previous read
+    //false if not.  The optional parameter delta can be used to test if the
+    //change is bigger than a certain size (returning true) or not (returning false).
+    //delta is expressed as a fraction of full range.  E.g. setting delta = 0.1 will
+    //mean the function only returns true if the parameter has changed more than 10% of
+    //full scale
+    bool knobChanged(int knob, float delta = 0.);
+    bool CVChanged(int cv_channel, float delta=0.);
+    
+    
     //the functions below do some scaling and reduce jitter to prepare
     //CV and knob inputs for MIDI output
     int readCVInputMIDI(int channel);
@@ -219,6 +229,9 @@ class Betweener
     //they can be accessed via Betweener::MCP4922_write etc.
     static void MCP4922_write(int cs_pin, byte dac, int value);
 
+    
+    
+    
 #ifdef DODIGIPOTS
     static void AD5241_write(byte address, int value);
 #endif
@@ -249,6 +262,24 @@ class Betweener
     int currentKnob3;
     int currentKnob4;
 
+    // these are the variables we use to store previous values
+    // updated whenever a read operation is performed
+    int lastCV1;
+    int lastCV2;
+    int lastCV3;
+    int lastCV4;
+    
+    // these are the variables that store previous knob / pot readings,
+    // updated whenever a read operation is performed
+    int lastKnob1;
+    int lastKnob2;
+    int lastKnob3;
+    int lastKnob4;
+    
+    
+    
+    
+    
     // these are the trigger inputs.  We use the Bounce library, which provides
     // a way to avoid accidental triggers due to fluctuating inputs
     Bounce trig1;
