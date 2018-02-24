@@ -71,7 +71,7 @@ void Betweener::begin(void){
     SPI.setMOSI(SPI_MOSI);  //use alternate SPI MOSI
     SPI.setSCK(SPI_SCK);  //use alternate SPI SCK
     SPI.begin();
-
+ 
     
     //Here, we tell Teensy what to do with trigger pins
     pinMode(TRIGGER_INPUT1, INPUT_PULLUP);
@@ -98,6 +98,34 @@ void Betweener::begin(void){
     trig4.interval(bounce_ms);
  
 
+    //set up the smoothed analog readout objects
+    smoothCV1.setup(CVIN1, RASleep, RASnapMultiplier);
+    smoothCV1.setActivityThreshold(RAActivityThreshold);
+   
+   // pinMode(A7, INPUT_PULLUP);
+    
+    smoothCV2.setup(CVIN2, RASleep, RASnapMultiplier);
+    smoothCV2.setActivityThreshold(RAActivityThreshold);
+    
+    smoothCV3.setup(CVIN3, RASleep, RASnapMultiplier);
+    smoothCV3.setActivityThreshold(RAActivityThreshold);
+    
+    smoothCV4.setup(CVIN4, RASleep, RASnapMultiplier);
+    smoothCV4.setActivityThreshold(RAActivityThreshold);
+    
+    smoothKnob1.setup(KNOB1, RASleep, RASnapMultiplier);
+    smoothKnob1.setActivityThreshold(RAActivityThreshold);
+  
+    smoothKnob2.setup(KNOB2, RASleep, RASnapMultiplier);
+    smoothKnob2.setActivityThreshold(RAActivityThreshold);
+    
+    smoothKnob3.setup(KNOB3, RASleep, RASnapMultiplier);
+    smoothKnob3.setActivityThreshold(RAActivityThreshold);
+    
+    smoothKnob4.setup(KNOB4, RASleep, RASnapMultiplier);
+    smoothKnob4.setActivityThreshold(RAActivityThreshold);
+    
+
     
     //Start the ticker timers
     msecTickerCVRead = 0;
@@ -120,7 +148,6 @@ void Betweener::begin(void){
 }
 
 
-
 void Betweener::readTriggers(void){
     //The bounce library has a function update() that is the
     //main read function
@@ -132,7 +159,7 @@ void Betweener::readTriggers(void){
 }
 
 
-void Betweener::readCVInputs(void){
+void Betweener::readCVs(void){
     //we could put stuff in here to limit the read
     //rate, but right now we'll leave that to the sketch
     
@@ -140,11 +167,23 @@ void Betweener::readCVInputs(void){
     lastCV2 = currentCV2;
     lastCV3 = currentCV3;
     lastCV4 = currentCV4;
-        
-    currentCV1 = analogRead(ANALOG1);
-    currentCV2 = analogRead(ANALOG2);
-    currentCV3 = analogRead(ANALOG3);
-    currentCV4 = analogRead(ANALOG4);
+    
+    smoothCV1.update();
+    smoothCV2.update();
+    smoothCV3.update();
+    smoothCV4.update();
+  
+    currentCV1 = smoothCV1.getValue();
+    currentCV2 = smoothCV2.getValue();
+    currentCV3 = smoothCV3.getValue();
+    currentCV4 = smoothCV4.getValue();
+    
+    
+//if we want to do this raw:
+//    currentCV1 = analogRead(CVIN1);
+//    currentCV2 = analogRead(CVIN2);
+//    currentCV3 = analogRead(CVIN3);
+//    currentCV4 = analogRead(CVIN4);
 
 }
 
@@ -155,11 +194,22 @@ void Betweener::readKnobs(void){
     lastKnob2=currentKnob2;
     lastKnob3=currentKnob3;
     lastKnob4=currentKnob4;
+
+    smoothKnob1.update();
+    smoothKnob2.update();
+    smoothKnob3.update();
+    smoothKnob4.update();
     
-    currentKnob1 = analogRead(KNOB1);
-    currentKnob2 = analogRead(KNOB2);
-    currentKnob3 = analogRead(KNOB3);
-    currentKnob4 = analogRead(KNOB4);
+    currentKnob1=smoothKnob1.getValue();
+    currentKnob2=smoothKnob2.getValue();
+    currentKnob3=smoothKnob3.getValue();
+    currentKnob4=smoothKnob4.getValue();
+    
+    //if we wanted raw reads:
+//    currentKnob1 = analogRead(KNOB1);
+//    currentKnob2 = analogRead(KNOB2);
+//    currentKnob3 = analogRead(KNOB3);
+//    currentKnob4 = analogRead(KNOB4);
 }
 
 void Betweener::readUsbMIDI(void) {
@@ -184,7 +234,7 @@ void Betweener::readDINMIDI(void){
 void Betweener::readAllInputs(void){
     //run the previous four functions all in sequence
     readTriggers();
-    readCVInputs();
+    readCVs();
     readKnobs();
     readUsbMIDI();
 #ifdef DODINMIDI
@@ -192,19 +242,28 @@ void Betweener::readAllInputs(void){
 #endif
 }
 
-void Betweener::readTrigger(int channel){
+
+//for some reason the code below does not
+//behave the way I expect so I am commenting it out
+/*
+bool Betweener::triggerRising(int channel){
+    bool rising = false;
     switch (channel){
         case 1:
             trig1.update();
+            rising = trig1.risingEdge();
             break;
         case 2:
             trig2.update();
+            rising = trig2.risingEdge();
             break;
         case 3:
             trig3.update();
+            rising = trig3.risingEdge();
             break;
         case 4:
             trig4.update();
+            rising=trig4.risingEdge();
             break;
         default:
             //we shouldn't get here unless you gave an incorrect value
@@ -213,258 +272,221 @@ void Betweener::readTrigger(int channel){
             break;
         
     }
+    return rising;
+    
 }
 
 
-void Betweener::readCVInput(int channel){
+bool Betweener::triggerFalling(int channel){
+    bool falling = false;
+    switch (channel){
+        case 1:
+            trig1.update();
+            falling = trig1.fallingEdge();
+            break;
+        case 2:
+            trig2.update();
+            falling = trig2.fallingEdge();
+            break;
+        case 3:
+            trig3.update();
+            falling = trig3.fallingEdge();
+            break;
+        case 4:
+            trig4.update();
+            falling=trig4.fallingEdge();
+            break;
+        default:
+            //we shouldn't get here unless you gave an incorrect value
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+            
+            break;
+            
+    }
+    return falling;
+    
+}
+
+*/
+
+int Betweener::readCV(int channel){
+    int value = -1;
+    
     switch (channel){
         case 1:
             lastCV1=currentCV1;
-            currentCV1 = analogRead(ANALOG1);
-
+            smoothCV1.update();
+            currentCV1 = smoothCV1.getValue();
+            value = currentCV1;
+//            currentCV1 = analogRead(CVIN1);
             break;
+            
         case 2:
             lastCV2=currentCV2;
-            currentCV2 = analogRead(ANALOG2);
-
+            smoothCV2.update();
+            currentCV2 = smoothCV2.getValue();
+            value = currentCV2;
+//            currentCV2 = analogRead(CVIN2);
             break;
+            
         case 3:
             lastCV3=currentCV3;
-            currentCV3 = analogRead(ANALOG3);
-
+            smoothCV3.update();
+            currentCV3=smoothCV3.getValue();
+            value = currentCV3;
+//            currentCV3 = analogRead(CVIN3);
             break;
+            
         case 4:
             lastCV4=currentCV4;
-            currentCV4 = analogRead(ANALOG4);
-
+            smoothCV4.update();
+            currentCV4=smoothCV4.getValue();
+            value = currentCV4;
+//            currentCV4 = analogRead(CVIN4);
             break;
+            
         default:
             DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
             break;
 
     }
+    return value;
 }
 
 
 
-void Betweener::readKnob(int channel){
+int Betweener::readKnob(int channel){
+    int value = -1;
     switch (channel){
         case 1:
             lastKnob1=currentKnob1;
-            currentKnob1 = analogRead(KNOB1);
-            
+            smoothKnob1.update();
+            currentKnob1=smoothKnob1.getValue();
+            value = currentKnob1;
+//            currentKnob1 = analogRead(KNOB1);
             break;
+            
         case 2:
             lastKnob2=currentKnob2;
-            currentKnob2 = analogRead(KNOB2);
-            
+            smoothKnob2.update();
+            currentKnob2=smoothKnob2.getValue();
+            value = currentKnob2;
+//            currentKnob2 = analogRead(KNOB2);
             break;
+            
         case 3:
             lastKnob3=currentKnob3;
-            currentKnob3 = analogRead(KNOB3);
-            
+            smoothKnob3.update();
+            currentKnob3=smoothKnob3.getValue();
+            value = currentKnob3;
+//            currentKnob3 = analogRead(KNOB3);
             break;
+            
         case 4:
             lastKnob4=currentKnob4;
-            currentKnob4 = analogRead(KNOB4);
-            
+            smoothKnob4.update();
+            currentKnob4=smoothKnob4.getValue();
+            value = currentKnob4;
+//            currentKnob4 = analogRead(KNOB4);
             break;
         default:
             DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
             break;
             
     }
+    return value;
 }
 
 
-bool Betweener::knobChanged(int knob, float delta){
-    int current;
-    int last;
-    
+bool Betweener::knobChanged(int knob){
+    //currently relying on the built-in change function in the
+    //responsiveAnalogRead library.
+    //note this function INITIATES A READ
+ 
+    bool changed = false;
     switch(knob){
         case 1:
-            current = currentKnob1;
-            last = lastKnob1;
+            smoothKnob1.update();
+            changed=smoothKnob1.hasChanged();
             break;
         case 2:
-            current = currentKnob2;
-            last = lastKnob2;
+            smoothKnob2.update();
+            changed=smoothKnob2.hasChanged();
             break;
         case 3:
-            current = currentKnob3;
-            last=lastKnob3;
+            smoothKnob3.update();
+            changed=smoothKnob3.hasChanged();
             break;
         case 4:
-            current=currentKnob4;
-            last=lastKnob4;
-            
+            smoothKnob4.update();
+            changed=smoothKnob4.hasChanged();
             break;
         default:
             DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-            current=0;  //just so we don't get some crazy values here...
-            last=0;
+            //not sure whether to return true or false as default...
             break;
             
     }
-    // max value for knobs is 1023
-    // this will be evaluated as a float and compared to floating point fraction
-    if ( abs(current - last)/1023. > delta){
-        return true;
-    }else{
-        return false;
-    }
+  
+    
+    return changed;
     
 }
 
 
-bool Betweener::CVChanged(int cv_channel, float delta){
-    int current;
-    int last;
+bool Betweener::CVChanged(int cv_channel){
+    //like the knob case, this function INITIATES A READ
+    //and checks to see if the value is a new one
     
+    bool changed = false;
+
     switch(cv_channel){
         case 1:
-            current = currentCV1;
-            last = lastCV1;
+            smoothCV1.update();
+            changed = smoothCV1.hasChanged();
             break;
         case 2:
-            current = currentCV2;
-            last = lastCV2;
+            smoothCV2.update();
+            changed = smoothCV2.hasChanged();
             break;
         case 3:
-            current = currentCV3;
-            last=lastCV3;
+            smoothCV3.update();
+            changed = smoothCV3.hasChanged();
             break;
         case 4:
-            current=currentCV4;
-            last=lastCV4;
-            
+            smoothCV4.update();
+            changed = smoothCV4.hasChanged();
             break;
         default:
             DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-            current=0;  //just so we don't get some crazy values here...
-            last=0;
             break;
             
     }
-    // max value for CV inputs is 1023
-    // this will be evaluated as a float and compared to floating point fraction
-    if ( abs(current - last)/1023. > delta){
-        return true;
-    }else{
-        return false;
-    }
-    
+    return changed;
 }
-
-
 
 
 
 int Betweener::readCVInputMIDI(int channel){
-    //first update the value stored for the selected channel
-    readCVInput(channel);
-    int val=-1;
-    //grab the value
-    switch (channel){
-        case 1:
-            val=currentCV1;
-            
-            break;
-        case 2:
-            val=currentCV2;
-            
-            break;
-        case 3:
-            val=currentCV3;
-            
-            break;
-        case 4:
-            val=currentCV4;
-            
-            break;
-        default:
-            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-            break;
-            
-    }
-    //convert it and return it:
-    return CVtoMIDI(val);
+    return CVtoMIDI(readCV(channel));
 
-    
 }
 
 int Betweener::readKnobMIDI(int channel){
-    //first update the value stored for the selected channel
-    readKnob(channel);
-    int val=-1;
-    //grab the value
-    switch (channel){
-        case 1:
-            val=currentKnob1;
-            
-            break;
-        case 2:
-            val=currentKnob2;
-            
-            break;
-        case 3:
-            val=currentKnob3;
-            
-            break;
-        case 4:
-            val=currentKnob4;
-            
-            break;
-        default:
-            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-            break;
-            
-    }
-    //convert it and return it:
-    return knobToMIDI(val);
-    
+    return knobToMIDI(readKnob(channel));
     
 }
 
 
-
 int Betweener::readKnobCV(int channel){
-    //first update the value stored for the selected channel
-    readKnob(channel);
-    int val=-1;
-    //grab the value
-    switch (channel){
-        case 1:
-            val=currentKnob1;
-            
-            break;
-        case 2:
-            val=currentKnob2;
-            
-            break;
-        case 3:
-            val=currentKnob3;
-            
-            break;
-        case 4:
-            val=currentKnob4;
-            
-            break;
-        default:
-            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-            break;
-            
-    }
-    //convert it and return it:
-    return knobToCV(val);
-    
-    
+    return knobToCV(readKnob(channel));
 }
     
 int Betweener::CVtoMIDI(int val){
     //CV inputs are 10 bit (range 0-1023)
-    //midi CC values go from 0 to 127
-    int midival = map(val, 0, 1023, 0, 127);
+    //midi CC values go from 0 to 127, 7 bit
+    //so we can get that by simply bit shifting
+    int midival = val >>3;
     return midival;
     
 }
@@ -481,8 +503,9 @@ int Betweener::MIDItoCV(int val){
 
 int Betweener::knobToMIDI(int val){
     //knob inputs are 10 bit (range 0-1023)
-    //midi CC values go from 0 to 127
-    int midival = map(val, 0, 1023, 0, 127);
+    //midi CC values go from 0 to 127, 7 bit
+    //so we can get that by simply bit shifting
+    int midival = val >> 3;
     return midival;
     
 }

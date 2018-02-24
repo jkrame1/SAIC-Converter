@@ -52,6 +52,7 @@
 #include <Bounce2.h>
 #include <MIDI.h>
 #include <Wire.h>
+#include <ResponsiveAnalogRead.h>
 
 
 //This is where we define hard-wired pin associations.
@@ -92,15 +93,15 @@
 #define TRIGGER_INPUT3 5
 #define TRIGGER_INPUT4 4
 //analog inputs used for the 4 CV inputs
-#define ANALOG1 7
-#define ANALOG2 6
-#define ANALOG3 3
-#define ANALOG4 2
+#define CVIN1 A7
+#define CVIN2 A6
+#define CVIN3 A3
+#define CVIN4 A2
 //analog inputs used for the 4 potentiometers/knobs
-#define KNOB1 12
-#define KNOB2 13
-#define KNOB3 11
-#define KNOB4 10
+#define KNOB1 A12
+#define KNOB2 A13
+#define KNOB3 A11
+#define KNOB4 A10
 
 
 //use this flag to decide whether to make use of DIN midi or not
@@ -128,6 +129,8 @@
 #define DIGIPOTADDR2 45
 #define DIGIPOTADDR3 46
 #define DIGIPOTADDR4 46
+
+
 
 //If you want the code to give you some error messages in the
 //serial monitor, leave the line below. Otherwise, comment it out.
@@ -178,11 +181,17 @@ class Betweener
     ////////////////////////
     // INPUT FUNCTIONS
     // these are the functions for making the Betweener read inputs.
-    // You have the choice of manually asking the device to read the various
-    // types of input one at a time, or asking it to read all of them at once.
+    // you have two choices for how to handle inputs...
+    // you can ask Betweener to read everything and just store the
+    // numbers, whicih you then retrieve and deal with yourself,
+    // or you can ask it to perform a read and give you back a number
+    // for an individual channel.
 
+    //these read functions load up current values of all inputs into
+    //the object.  Access those by accessing member variables, e.g.
+    // b.curentCV1
     void readTriggers(void);  //reads all triggers
-    void readCVInputs(void); //reads analog inputs (CV inputs)
+    void readCVs(void); //reads analog inputs (CV inputs)
     void readKnobs(void);  //reads potentiometer inputs
     void readUsbMIDI(void);  //reads MIDI via the usbMIDI arduino functionality
 #ifdef DODINMIDI
@@ -191,26 +200,23 @@ class Betweener
     
     void readAllInputs(void); //reads triggers, CV, knobs, and USB MIDI inputs, in that order
     
-    //single channel read functions:
-    void readTrigger(int channel);
-    void readCVInput(int channel);
-    void readKnob(int channel);
+    //these functions read individual channels and return the
+    //values directly:
+    int readCV(int channel);   //returns a smoothed 10 bit number
+    int readKnob(int channel);     //returns a smoothed 10 bit number
 
-    //functions that return true if the value has changed since previous read
-    //false if not.  The optional parameter delta can be used to test if the
-    //change is bigger than a certain size (returning true) or not (returning false).
-    //delta is expressed as a fraction of full range.  E.g. setting delta = 0.1 will
-    //mean the function only returns true if the parameter has changed more than 10% of
-    //full scale
-    bool knobChanged(int knob, float delta = 0.);
-    bool CVChanged(int cv_channel, float delta=0.);
-    
-    
-    //the functions below do some scaling and reduce jitter to prepare
-    //CV and knob inputs for MIDI output
+    //these versions do some converting for you
     int readCVInputMIDI(int channel);
     int readKnobMIDI(int channel);
     int readKnobCV(int channel);
+    
+    //functions that check for change.  Note these functions
+    //INITIATE A READ and check for change
+    bool knobChanged(int knob);
+    bool CVChanged(int cv_channel);
+//    bool triggerRising(int trigger);  //these functions are not behaving
+    //bool triggerFalling(int trigger);
+
     
     /////////////////////////
     //BASIC OUTPUT FUNCTIONS
@@ -220,17 +226,18 @@ class Betweener
     void writeCVOut(int value, int cvout); //value is in range 0-4095; cvout selects channel 1 through 4
     void writeDigipotOut(int value, int digipot); //value is in range 0-255; digipot is 1 through 4
     
-    //these are "set" and "get" functions that let the user check and change internal state parameters
+    //these are setup functions you can call to override parameter defaults before calling 'begin'
+    //so that nothing needs to be recompiled to try different options.
+    //the default options are hard-coded down below in this .h file
     void setBounceMillisec(int millisec){bounce_ms = millisec;};
-    int getBounceMillisec(void){return bounce_ms;};
+    void setRASnapMultiplier(float snap){RASnapMultiplier = snap;};
+    void setRAActivityThreshold(int thresh){RAActivityThreshold=thresh;};
+    void setRASleep(bool sleep){RASleep = sleep;};
     
     //static means that these functions can be accessed without necessarily having
     //a "Betweener" object available.  Just by including this library/class,
     //they can be accessed via Betweener::MCP4922_write etc.
     static void MCP4922_write(int cs_pin, byte dac, int value);
-
-    
-    
     
 #ifdef DODIGIPOTS
     static void AD5241_write(byte address, int value);
@@ -276,9 +283,7 @@ class Betweener
     int lastKnob3;
     int lastKnob4;
     
-    
-    
-    
+
     
     // these are the trigger inputs.  We use the Bounce library, which provides
     // a way to avoid accidental triggers due to fluctuating inputs
@@ -304,11 +309,24 @@ class Betweener
 
     
     //right now this class is written so that almost everything is in the hands
-    //of the user.. We just have an internal Bounce related parameter with a default value
+    //of the user.. except we want some parameters to be a little harder to modify by
+    //accident, so those go here.  Also we hide the smoothing analog read objects here.
     private:
 
     int bounce_ms = 5;
-
+    float RASnapMultiplier = 0.015; //snapMultiplier parameter for the ResponsiveAnalogRead library
+    int RAActivityThreshold = 10; //activity threshold parameter for ResponsiveAnalogRead
+    bool RASleep = true;  //sleep parameter for ResponsiveAnalogRead
+    
+    ResponsiveAnalogRead smoothKnob1;
+    ResponsiveAnalogRead smoothKnob2;
+    ResponsiveAnalogRead smoothKnob3;
+    ResponsiveAnalogRead smoothKnob4;
+    
+    ResponsiveAnalogRead smoothCV1;
+    ResponsiveAnalogRead smoothCV2;
+    ResponsiveAnalogRead smoothCV3;
+    ResponsiveAnalogRead smoothCV4;
   
     
 };
