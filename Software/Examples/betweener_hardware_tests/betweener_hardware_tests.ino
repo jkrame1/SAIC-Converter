@@ -32,6 +32,7 @@ void setup() {
 int selection;
 
 void loop() {
+
   //wait for the user to input something and then grab it
   if (Serial.available()){
     //grab first character that was input
@@ -75,7 +76,7 @@ void loop() {
         knobsToCV();
         break;
       case '8': 
-        Serial.println("you entered 8.  Testing for knob changes with a delta of 25%");
+        Serial.println("you entered 8.  Testing for knob changes");
         checkKnobChanges();
         break;
       case 'q':
@@ -106,7 +107,7 @@ void printMenu(){
   Serial.println("Enter 5 to test DIN MIDI input (assumes you have compiled with MIDI functionality)");
   Serial.println("Enter 6 to test DIN MIDI output (assumes you have compiled with MIDI functionality)");
   Serial.println("Enter 7 to test sending knob values to CV outs (e.g. knob 1 to CV out 1, etc.)");
-  Serial.println("Enter 8 to test for changes in knob value with a delta of 25% (returns true if you change by more than 1/4 full scale)");
+  Serial.println("Enter 8 to test for changes in knob value");
   Serial.println("=======================");
   Serial.println("");
   Serial.println("");
@@ -118,9 +119,11 @@ void printKnobValues(){
   //as long as the user has not entered something in the serial monitor window,
   //we will read and print knob values
   while (!Serial.available()){
-    //the function below just reads knobs.
-    //we could also use b.readAllInputs() and it would work too.
-    b.readKnobs();
+ 
+    //Two ways to do this; leaving one commented out for reference    
+    //first way reads the info into betweener and then grabs the 
+    //member variables themselves
+    /*b.readKnobs();
     //now the current knob values are stored in the betweener object
     //and we access and print them:
     Serial.println("knob values:");
@@ -128,6 +131,17 @@ void printKnobValues(){
     Serial.println(b.currentKnob2);
     Serial.println(b.currentKnob3);
     Serial.println(b.currentKnob4);
+    */
+
+    //second way performs a read of each channel only when we ask for it.
+    //Note that if we want these formatted to MIDI outputs we can 
+    //use readKnobMIDI instead of readKnob
+    Serial.println("knob values:");
+    Serial.println(b.readKnob(1));
+    Serial.println(b.readKnob(2));
+    Serial.println(b.readKnob(3));
+    Serial.println(b.readKnob(4));
+    
     delay(500);
   }
 }
@@ -163,7 +177,7 @@ void printTriggers(){
     if (b.trig4.fallingEdge()){
       Serial.println("Falling edge on trigger 4");
     }
-    delay(100);    
+    delay(75);    
   }
 
 }
@@ -173,8 +187,11 @@ void printCVInputs(){
   //as long as the user is not inputting anything from the keyboard,
   //we will read and print CV values with some delay
   while(!Serial.available()){
-    //read CV inputs.  we could also use readAllInputs() here.
-    b.readCVInputs(); 
+    //There are two ways to do this.  One commented out just for 
+    //reference in this code.
+    //first way reads all the CV inputs all at once into Betweener
+    //and then we access the current values as member variables
+/*    b.readCVs(); 
     //now the current CV values are stored in the betweener class, and 
     //we can grab them and print them
 
@@ -183,8 +200,20 @@ void printCVInputs(){
     Serial.println(b.currentCV2);
     Serial.println(b.currentCV3);
     Serial.println(b.currentCV4);
+*/
 
-    delay(200);
+  //second way performs a read of each channel only when 
+  //we ask for that channel's info.
+  //note that if we want this formatted to MIDI
+  // we could replace with readCVMIDI.
+  Serial.println("Current CV input values:");
+  Serial.println(b.readCV(1));
+  Serial.println(b.readCV(2));
+  Serial.println(b.readCV(3));
+  Serial.println(b.readCV(4));
+  
+
+   delay(200);
   }
 }
 
@@ -280,11 +309,11 @@ void knobsToCV(){
 void checkKnobChanges(){
   while(!Serial.available()){
     b.readKnobs();
-    Serial.println("Knob changes greater than 25% of full range:");
-    Serial.println(b.knobChanged(1, 0.25));
-    Serial.println(b.knobChanged(2, 0.25));
-    Serial.println(b.knobChanged(3, 0.25));
-    Serial.println(b.knobChanged(4, 0.25));
+    Serial.println("Knobs changing?");
+    Serial.println(b.knobChanged(1));
+    Serial.println(b.knobChanged(2));
+    Serial.println(b.knobChanged(3));
+    Serial.println(b.knobChanged(4));
 
     delay(400);
   }
