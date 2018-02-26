@@ -30,9 +30,10 @@ void setup() {
   pinMode(chip_select2, OUTPUT);
   digitalWrite(chip_select2, HIGH); // HIGH);
 
-  SPI.begin();
   SPI.setMOSI(7);
   SPI.setSCK(14);
+  SPI.begin();
+  
   Serial.begin(115200); //open serial port to receive values from knobs
 
 }

@@ -99,10 +99,11 @@ void setup() {
   pinMode(chip_select2, OUTPUT);
   digitalWrite(chip_select2, HIGH); // HIGH);
 
-  SPI.begin();
+
   SPI.setMOSI(7);  //use alternate SPI MOSI
   SPI.setSCK(14);  //use alternate SPI SCK
-
+  SPI.begin();
+  
   Serial.begin(115200);
 
   usbMIDI.setHandleNoteOff(OnNoteOff);  //set USB MIDI read for note off

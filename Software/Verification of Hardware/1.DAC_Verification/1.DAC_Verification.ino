@@ -20,9 +20,11 @@ void setup() {
   pinMode(chip_select2, OUTPUT);
   digitalWrite(chip_select2, HIGH); // HIGH);
 
-  SPI.begin();
+
   SPI.setMOSI(7);
   SPI.setSCK(14);
+  SPI.begin();
+
   Serial.begin(115200);
 
 }
@@ -30,16 +32,16 @@ void setup() {
 
 void loop() {
 
-//ramping from 0 to maximum over 4096 steps
-//writing the output to both DACs on the chip at the
-//same time
+  //ramping from 0 to maximum over 4096 steps
+  //writing the output to both DACs on the chip at the
+  //same time
 
   for (int i = 0; i < 4096; i ++) {
-  MCP4922_write(chip_select, 0, i);  //OUTPUT 2
-  MCP4922_write(chip_select, 1, i);  //OUTPUT 4
-  MCP4922_write(chip_select2, 0, i); //OUTPUT 3
-  MCP4922_write(chip_select2, 1, i); //OUTPUT 1
-  delay(1);
+    MCP4922_write(chip_select, 0, i);  //OUTPUT 2
+    MCP4922_write(chip_select, 1, i);  //OUTPUT 4
+    MCP4922_write(chip_select2, 0, i); //OUTPUT 3
+    MCP4922_write(chip_select2, 1, i); //OUTPUT 1
+    delay(1);
   }
 }
 
