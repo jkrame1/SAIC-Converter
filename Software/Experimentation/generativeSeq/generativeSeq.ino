@@ -18,30 +18,32 @@ Betweener b;
 /**SET VARIABLES**/
 
 //  sequencer arrays
-int CVsequence[16];
-int gateSequence[16];
+int CVsequence1[32];
+int CVsequence2[32];
+int chaosSequence1[32];
+int chaosSequence2[32];
 
 //  sequencer length
-int CVseqL = 15; //0-15
-int gateSeqL = 15;
+int seqL = 31; //0-31
 
 //  position of sequencer
-int CVseqCount = 0;
-int gateSeqCount = 0;
+int seqCount = 0;
 
 /**SETUP**/
 
 void setup() {
-  Serial.begin(115200);
-  b.begin();
+  //  serial debugger
+  //Serial.begin(115200);
 
+  //  init betweener library
+  b.begin();
 
   //  randomize seed based on ambient analog read
   randomSeed(analogRead(A17)*PI);
 
   //  init sequencers
   randomizeCVseq();
-  randomizeGateSeq();
+  randomizeChaosSeq();
 
 }
 
@@ -52,35 +54,25 @@ void loop() {
   b.readTriggers();
 
   //  clock input on trig 4 edge
-  //  push CV + gate count forward 1
+  //  push sequencer count forward 1
   clockCount();
 
   //  on trig 1 edge randomize CV sequencer
   if (b.trig1.fell()) {
-    Serial.println("trig 1");
     randomizeCVseq();
   }
 
-  //  on trig 2 edge randomize gate sequencer
+  //  on trig 2 edge randomize chaos sequencer
   if (b.trig2.fell()) {
-    Serial.println("trig 2");
-    randomizeGateSeq();
+    randomizeChaosSeq();
 
   }
 
   //  on trig 3 edge set clock back to 0
   if (b.trig3.fell()) {
-    Serial.println("trig 3");
-    CVseqCount = 0;
-    gateSeqCount = 0;
+    seqCount = 0;
+
   }
-
-  //  write CV and gate to DAC1 and DAC2
-  b.writeCVOut(CVsequence[CVseqCount], 1);
-  //Serial.println(CVsequence[CVseqCount]);
-  b.writeCVOut(gateSequence[gateSeqCount], 2);
-  //Serial.println(gateSequence[gateSeqCount]);
-
 }
 
 /**FUNCTIONS**/
@@ -89,20 +81,17 @@ void loop() {
 void clockCount() {
 
   if (b.trig4.fell()) {
-    Serial.println("trig 4");
-    if (CVseqCount < CVseqL) {
-      CVseqCount++;
+    if (seqCount < seqL) {
+      seqCount++;
     } else {
-      CVseqCount = 0;
+      seqCount = 0;
     }
 
-    // Serial.println(CVseqCount);
-
-    if (gateSeqCount < gateSeqL) {
-      gateSeqCount++;
-    } else {
-      gateSeqCount = 0;
-    }
+    //  write CV and gate to DAC
+    b.writeCVOut(CVsequence1[seqCount], 1);
+    b.writeCVOut(CVsequence2[seqCount], 2);
+    b.writeCVOut(chaosSequence1[seqCount], 3);
+    b.writeCVOut(chaosSequence2[seqCount], 4);
   }
 }
 
@@ -115,7 +104,7 @@ void randomizeCVseq() {
   int CV2 = b.readKnobCV(3);
   int CV3 = b.readKnobCV(4);
 
-  for (int i = 0; i <= 15; i++) {
+  for (int i = 0; i <= seqL; i++) {
     int sel = 0;
     int r = random(4);
 
@@ -129,21 +118,38 @@ void randomizeCVseq() {
       sel = CV3;
     }
 
-    CVsequence[i] = sel;
+    CVsequence1[i] = sel;
+  }
+
+  for (int i = 0; i <= seqL; i++) {
+    int sel = 0;
+    int r = random(4);
+
+    if (r == 0) {
+      sel = CV0;
+    } else if (r == 1) {
+      sel = CV1;
+    } else if (r == 2) {
+      sel = CV2;
+    } else if (r == 3) {
+      sel = CV3;
+    }
+
+    CVsequence2[i] = sel;
   }
 }
 
 //  randomize gate sequencer
 //  UPDATE TO INCLUDE DENSITY
-void randomizeGateSeq() {
+void randomizeChaosSeq() {
 
-  for (int i = 0; i <= 15; i++) {
-    int r = random(2);
-    if (r == 1) {
-      r = 4095;
-    }
-
-    gateSequence[i] = r;
+  for (int i = 0; i <= seqL; i++) {
+    int r = random(4095);
+    chaosSequence1[i] = r;
+  }
+  
+  for (int i = 0; i <= seqL; i++) {
+    int r = random(4095);
+    chaosSequence2[i] = r;
   }
 }
-
