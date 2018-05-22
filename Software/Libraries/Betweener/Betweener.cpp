@@ -1,13 +1,34 @@
 //
 //  Betweener.cpp
-//  
-//  See the Betweener.h file for lots of comments and information
-//  for making sense of what this is.
 //
-//
-//  Created by kathryn schaffer on 10/23/17.
-//
+//  Copyright (c) 2018 Kathryn Schaffer
 
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
+//
+///////////////////////////////////////////////////////////////////////////////
+//  Betweener.cpp detailed description:
+//
+//  This is the "implementation file" for the Betweener library.  Most of the
+//  important overall comments about this library are in the associated
+//  header file (Betweener.h).  This file is also obsessively commented, though,
+//  with novice users in mind.
+////////////////////////////////////////////////////////////////////////////////
 
 //the functions and many variables in this file were all
 //declared in Betweener.h, so we include it
@@ -15,19 +36,18 @@
 
 //Now, below, we have the code implementing all the functions
 //(a.k.a. methods) of the Betweener class.
-
 //The Betweener:: syntax specifies to the compiler that these
 //functions live in the "Betweener namespace" which means that
 //they will not conflict with other functions associated with
 //other classes that have similar names.
 
-//Constructor.  This code is run when you make a Betweener object.
 Betweener::Betweener(void){
-    
-    //We do not actually do much in this constructor because of weird technical issues
-    //that make it better to use a .begin() function instead.
+    //Constructor.  This code is run when you make a Betweener object.
+    //We do not actually do much in this constructor.  For technical reasons
+    //it is better to put all of the important stuff in a begin() function.
     
     //so... we just initialize some internal variables to nonsense values
+    //so that they are not uninitialized.
     currentCV1=-1;
     currentCV2=-1;
     currentCV3=-1;
@@ -66,7 +86,6 @@ void Betweener::begin(void){
     digitalWrite(DAC_CHIP_SELECT2, HIGH);
    
     //Start SPI
-
     //note that the order here is important when using the Audio shield
     SPI.setMOSI(SPI_MOSI);  //use alternate SPI MOSI
     SPI.setSCK(SPI_SCK);  //use alternate SPI SCK
@@ -83,8 +102,7 @@ void Betweener::begin(void){
     // Create Bounce objects for each button.  The Bounce object
     // automatically deals with contact chatter or "bounce", and
     // it makes detecting changes very simple.
-    
-    // note that bounce_ms is set to a default in the .h file
+        // Note that bounce_ms is set to a default in the .h file
     trig1.attach(TRIGGER_INPUT1);
     trig1.interval(bounce_ms);
     
@@ -99,10 +117,10 @@ void Betweener::begin(void){
  
 
     //set up the smoothed analog readout objects
+    //this depends on our own modified version of the
+    //responsiveAnalogRead library
     smoothCV1.setup(CVIN1, RASleep, RASnapMultiplier);
     smoothCV1.setActivityThreshold(RAActivityThreshold);
-   
-   // pinMode(A7, INPUT_PULLUP);
     
     smoothCV2.setup(CVIN2, RASleep, RASnapMultiplier);
     smoothCV2.setActivityThreshold(RAActivityThreshold);
@@ -124,14 +142,7 @@ void Betweener::begin(void){
     
     smoothKnob4.setup(KNOB4, RASleep, RASnapMultiplier);
     smoothKnob4.setActivityThreshold(RAActivityThreshold);
-    
-
-    
-    //Start the ticker timers
-    msecTickerCVRead = 0;
-    msecTickerTrigger = 0;
-    msecTickerMIDI = 0;
-
+  
     
     //If we are using DIN MIDI I/O we need some setup:
 #ifdef DODINMIDI
@@ -140,11 +151,6 @@ void Betweener::begin(void){
     DINMIDI.begin(MIDI_CHANNEL_OMNI);  //monitor all input channels
 #endif
     
-    //If we are using digipots, we need to be running the Wire library
-#ifdef DODIGIPOTS
-    Wire.begin();
-#endif
-  
 }
 
 
@@ -178,12 +184,6 @@ void Betweener::readCVs(void){
     currentCV3 = smoothCV3.getValue();
     currentCV4 = smoothCV4.getValue();
     
-    
-//if we want to do this raw:
-//    currentCV1 = analogRead(CVIN1);
-//    currentCV2 = analogRead(CVIN2);
-//    currentCV3 = analogRead(CVIN3);
-//    currentCV4 = analogRead(CVIN4);
 
 }
 
@@ -205,11 +205,6 @@ void Betweener::readKnobs(void){
     currentKnob3=smoothKnob3.getValue();
     currentKnob4=smoothKnob4.getValue();
     
-    //if we wanted raw reads:
-//    currentKnob1 = analogRead(KNOB1);
-//    currentKnob2 = analogRead(KNOB2);
-//    currentKnob3 = analogRead(KNOB3);
-//    currentKnob4 = analogRead(KNOB4);
 }
 
 void Betweener::readUsbMIDI(void) {
@@ -222,13 +217,9 @@ void Betweener::readUsbMIDI(void) {
 
 #ifdef DODINMIDI
 void Betweener::readDINMIDI(void){
-
         DINMIDI.read();
 }
 #endif
-
-
-
 
 
 void Betweener::readAllInputs(void){
@@ -243,72 +234,6 @@ void Betweener::readAllInputs(void){
 }
 
 
-//for some reason the code below does not
-//behave the way I expect so I am commenting it out
-/*
-bool Betweener::triggerRising(int channel){
-    bool rising = false;
-    switch (channel){
-        case 1:
-            trig1.update();
-            rising = trig1.risingEdge();
-            break;
-        case 2:
-            trig2.update();
-            rising = trig2.risingEdge();
-            break;
-        case 3:
-            trig3.update();
-            rising = trig3.risingEdge();
-            break;
-        case 4:
-            trig4.update();
-            rising=trig4.risingEdge();
-            break;
-        default:
-            //we shouldn't get here unless you gave an incorrect value
-            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-        
-            break;
-        
-    }
-    return rising;
-    
-}
-
-
-bool Betweener::triggerFalling(int channel){
-    bool falling = false;
-    switch (channel){
-        case 1:
-            trig1.update();
-            falling = trig1.fallingEdge();
-            break;
-        case 2:
-            trig2.update();
-            falling = trig2.fallingEdge();
-            break;
-        case 3:
-            trig3.update();
-            falling = trig3.fallingEdge();
-            break;
-        case 4:
-            trig4.update();
-            falling=trig4.fallingEdge();
-            break;
-        default:
-            //we shouldn't get here unless you gave an incorrect value
-            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
-            
-            break;
-            
-    }
-    return falling;
-    
-}
-
-*/
-
 int Betweener::readCV(int channel){
     int value = -1;
     
@@ -318,7 +243,6 @@ int Betweener::readCV(int channel){
             smoothCV1.update();
             currentCV1 = smoothCV1.getValue();
             value = currentCV1;
-//            currentCV1 = analogRead(CVIN1);
             break;
             
         case 2:
@@ -326,7 +250,6 @@ int Betweener::readCV(int channel){
             smoothCV2.update();
             currentCV2 = smoothCV2.getValue();
             value = currentCV2;
-//            currentCV2 = analogRead(CVIN2);
             break;
             
         case 3:
@@ -334,7 +257,6 @@ int Betweener::readCV(int channel){
             smoothCV3.update();
             currentCV3=smoothCV3.getValue();
             value = currentCV3;
-//            currentCV3 = analogRead(CVIN3);
             break;
             
         case 4:
@@ -342,7 +264,6 @@ int Betweener::readCV(int channel){
             smoothCV4.update();
             currentCV4=smoothCV4.getValue();
             value = currentCV4;
-//            currentCV4 = analogRead(CVIN4);
             break;
             
         default:
@@ -354,24 +275,22 @@ int Betweener::readCV(int channel){
 }
 
 
-
 int Betweener::readKnob(int channel){
     int value = -1;
+    
     switch (channel){
         case 1:
             lastKnob1=currentKnob1;
             smoothKnob1.update();
-            currentKnob1=smoothKnob1.getValue();
+            currentKnob1 = smoothKnob1.getValue();
             value = currentKnob1;
-//            currentKnob1 = analogRead(KNOB1);
             break;
             
         case 2:
             lastKnob2=currentKnob2;
             smoothKnob2.update();
-            currentKnob2=smoothKnob2.getValue();
+            currentKnob2 = smoothKnob2.getValue();
             value = currentKnob2;
-//            currentKnob2 = analogRead(KNOB2);
             break;
             
         case 3:
@@ -379,7 +298,6 @@ int Betweener::readKnob(int channel){
             smoothKnob3.update();
             currentKnob3=smoothKnob3.getValue();
             value = currentKnob3;
-//            currentKnob3 = analogRead(KNOB3);
             break;
             
         case 4:
@@ -387,7 +305,35 @@ int Betweener::readKnob(int channel){
             smoothKnob4.update();
             currentKnob4=smoothKnob4.getValue();
             value = currentKnob4;
-//            currentKnob4 = analogRead(KNOB4);
+            break;
+            
+        default:
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+            break;
+            
+    }
+    return value;
+}
+
+
+
+int Betweener::readKnobRaw(int channel){
+    int value = -1;
+    switch (channel){
+        case 1:
+            value = analogRead(KNOB1);
+            break;
+            
+        case 2:
+            value = analogRead(KNOB2);
+            break;
+            
+        case 3:
+            value = analogRead(KNOB3);
+            break;
+            
+        case 4:
+            value = analogRead(KNOB4);
             break;
         default:
             DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
@@ -396,6 +342,36 @@ int Betweener::readKnob(int channel){
     }
     return value;
 }
+
+
+int Betweener::readCVRaw(int channel){
+    int value = -1;
+    
+    switch (channel){
+        case 1:
+            value = analogRead(CVIN1);
+            break;
+            
+        case 2:
+            value = analogRead(CVIN2);
+            break;
+            
+        case 3:
+            value  = analogRead(CVIN3);
+            break;
+            
+        case 4:
+            value = analogRead(CVIN4);
+            break;
+            
+        default:
+            DEBUG_PRINTLN("you are trying to read an nonexistent channel!");
+            break;
+            
+    }
+    return value;
+}
+
 
 
 bool Betweener::knobChanged(int knob){
@@ -521,7 +497,7 @@ int Betweener::knobToCV(int val){
 
 void Betweener::MCP4922_write(int cs_pin, byte dac, int value){
     // Adapted from code by Sebastian Tomczak
-    // from a tutorial here:  //http://little-scale.blogspot.com/2016/11/teensy-and-mcp4922-dual-channel-12-bit.html
+    // from a tutorial here:  http://little-scale.blogspot.com/2016/11/teensy-and-mcp4922-dual-channel-12-bit.html
 
     byte low = value & 0xff;
     byte high = (value >> 8) & 0x0f;
@@ -538,18 +514,8 @@ void Betweener::MCP4922_write(int cs_pin, byte dac, int value){
     digitalWrite(cs_pin, HIGH);
 }
 
-#ifdef DODIGIPOTS
-void Betweener::AD5241_write(byte address, int value){
-    
 
-    Wire.beginTransmission(address); // transmit to device address
-    Wire.write(byte(0x00));            // sends instruction byte
-    Wire.write(value);             // sends potentiometer value byte
-    Wire.endTransmission();     // stop transmitting
-}
-#endif
-
-void Betweener::writeCVOut(int value, int cvout){
+void Betweener::writeCVOut(int cvout, int value){
     int cs_pin = -1;
     byte dac = -1;
     switch (cvout){
@@ -579,33 +545,4 @@ void Betweener::writeCVOut(int value, int cvout){
     
     MCP4922_write(cs_pin, dac,value);
 }
-
-#ifdef DODIGIPOTS
-void Betweener::writeDigipotOut(int value, int digipot){
-    byte addr = -1;
-
-    switch (digipot){
-        case 1:
-            addr = DIGIPOTADDR1;
-            break;
-        case 2:
-            addr = DIGIPOTADDR2;
-            break;
-        case 3:
-            addr = DIGIPOTADDR3;
-            break;
-        case 4:
-            addr = DIGIPOTADDR4;
-            break;
-        default:
-            DEBUG_PRINTLN("you are trying to write to a nonexistent digipot channel!");
-        break;
-        
-    }
-    
-    //should put in some idiot checks here that the value is reasonable...
-    
-    AD5241_write(addr,value);
-}
-#endif
 

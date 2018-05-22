@@ -1,5 +1,28 @@
-///////////////////////////////////////////////////////////////////////////
+//
 //  Betweener.h
+//
+//  Copyright (c) 2018 Kathryn Schaffer
+ 
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
+//
+///////////////////////////////////////////////////////////////////////////
+//  Betweener.h detailed description:
 //  
 //  This .h file defines the Betweener class, setting up all the
 //  variables and providing the "function prototypes" that tell the
@@ -22,20 +45,12 @@
 //  To test the Betweener hardware and see examples of how to use this
 //  library, load and run the sketch betweener_hardware_tests.ino
 //
-//  REFERENCES AND CREDITS:
-//      Author:  Kathryn Schaffer, with Joseph Kramer
-//      Also using code snippets from:
+//  ADDITIONAL CREDITS:
+//      Betweener hardware design: Joseph Kramer
+//      This code uses code snippets from:
 //          Sebastian Tomczak (MCP4922 write function)
 //
-//  TO DO:
-//     Implement optional serial output to be used for debugging/monitoring
-//     Make versions of the read functions that read single channels
-//     Put in idiot-checks on values sent to be written out
-//     Decide on reasonable licensing and liability statement to include here
-//
 //////////////////////////////////////////////////////////////////////////
-
-
 
 //these statements are a standard C++ way to avoid accidentally
 //re-loading this .h file multiple times, which can make for weird
@@ -51,7 +66,6 @@
 #include <SPI.h>
 #include <Bounce2.h>
 #include <MIDI.h>
-#include <Wire.h>
 #include <ResponsiveAnalogRead.h>
 
 
@@ -119,17 +133,6 @@
 //https://www.pjrc.com/teensy/td_uart.html
 #define DINMIDIIN 26
 #define DINMIDIOUT 31
-
-//use this flag to decide whether to make use of digipots connected
-//via I2C.  Comment out the flag to not use digipots (saves a little bit of code)
-#define DODIGIPOTS
-
-//digipot address bytes for four digipot outputs
-#define DIGIPOTADDR1 44
-#define DIGIPOTADDR2 45
-#define DIGIPOTADDR3 46
-#define DIGIPOTADDR4 46
-
 
 
 //If you want the code to give you some error messages in the
@@ -204,6 +207,9 @@ class Betweener
     //values directly:
     int readCV(int channel);   //returns a smoothed 10 bit number
     int readKnob(int channel);     //returns a smoothed 10 bit number
+    
+    int readCVRaw(int channel);  //returns an un-smoothed 10-bit number
+    int readKnobRaw(int channel);  //returns an un-smoothed 10-bit number
 
     //these versions do some converting for you
     int readCVInputMIDI(int channel);
@@ -211,20 +217,17 @@ class Betweener
     int readKnobCV(int channel);
     
     //functions that check for change.  Note these functions
-    //INITIATE A READ and check for change
+    //INITIATE A READ and check for change.
+    //they also use the algorithm packaged with the smoothing algorithm.
     bool knobChanged(int knob);
     bool CVChanged(int cv_channel);
-//    bool triggerRising(int trigger);  //these functions are not behaving
-    //bool triggerFalling(int trigger);
-
     
     /////////////////////////
     //BASIC OUTPUT FUNCTIONS
     //These functions assume you are using your sketch to decide directly what
     //output to write.  The functions are mainly useful for just hiding some of the
     //messier logic required by the specific DAC chip, etc.
-    void writeCVOut(int value, int cvout); //value is in range 0-4095; cvout selects channel 1 through 4
-    void writeDigipotOut(int value, int digipot); //value is in range 0-255; digipot is 1 through 4
+    void writeCVOut(int cvout, int value); //cvout selects channel 1 through 4; value is in range 0-4095
     
     //these are setup functions you can call to override parameter defaults before calling 'begin'
     //so that nothing needs to be recompiled to try different options.
@@ -239,21 +242,12 @@ class Betweener
     //they can be accessed via Betweener::MCP4922_write etc.
     static void MCP4922_write(int cs_pin, byte dac, int value);
     
-#ifdef DODIGIPOTS
-    static void AD5241_write(byte address, int value);
-#endif
-    
     //Scaling and conversion functions.  You can use these directly
     //and they are also used by some of the read functions
     int CVtoMIDI(int val);
     int MIDItoCV(int val);
     int knobToMIDI(int val);
     int knobToCV(int val);
-    
-    // ticker variables (not currently used anywhere, but available if need be)
-    elapsedMillis msecTickerCVRead;  //ticker for elapsed time since last analog read
-    elapsedMillis msecTickerTrigger; //ticker for elapsed time since last trigger
-    elapsedMillis msecTickerMIDI; //ticker for elapsed time since last MIDI read
 
     // these are the variables we use to store current analog input readings,
     // updated whenever a read operation is performed
@@ -283,8 +277,6 @@ class Betweener
     int lastKnob3;
     int lastKnob4;
     
-
-    
     // these are the trigger inputs.  We use the Bounce library, which provides
     // a way to avoid accidental triggers due to fluctuating inputs
     Bounce trig1;
@@ -293,7 +285,7 @@ class Betweener
     Bounce trig4;
     
     
-    //midi interface.  Don't freak out about how weird this looks.  Google c++ templates for more info.
+    //midi interface.  Don't freak out about how weird this looks.  Look up "c++ templates" for more info.
     //Note that we are going to remap the Serial2 pins and using those for DIN MIDI IO.
     //Also we only do this if we are going to compile the hardware MIDI stuff
 #ifdef DODINMIDI
@@ -310,7 +302,7 @@ class Betweener
     
     //right now this class is written so that almost everything is in the hands
     //of the user.. except we want some parameters to be a little harder to modify by
-    //accident, so those go here.  Also we hide the smoothing analog read objects here.
+    //accident, so those go here.  Also we hide the smoothing-analog-read objects here.
     private:
 
     int bounce_ms = 5;
