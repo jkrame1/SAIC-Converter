@@ -47,25 +47,25 @@ void loop() {
 //Velocity value is scaled and output on Channel 3
 void OnNoteOn(byte channel, byte note, byte velocity) {
   int noteCV = map(note, 0, 127, 0, 4095); //turn noteON messages into a CV range
-  b.writeCVOut(noteCV, 1); //When a note-on is received, write a CV value scaled to the note value
+  b.writeCVOut(1, noteCV); //When a note-on is received, write a CV value scaled to the note value
 
   if (velocity == 0) {
-    b.writeCVOut(0, 2); //When a note-off is received, write a gate LOW on output 2
+    b.writeCVOut(2,0); //When a note-off is received, write a gate LOW on output 2
     digitalWrite(8, LOW); //turn LED off if no Gate is present
   }
   else {
-    b.writeCVOut(4095, 2); //When a note-on is received, write a gate HIGH on output 2
+    b.writeCVOut(2, 4095); //When a note-on is received, write a gate HIGH on output 2
     digitalWrite(8, HIGH); //turn LED On when a Note On message is received
   }
 
   int velocityCV = map(velocity, 0, 127, 10, 4095); //scale MIDI velocity values to 12bit range for CV output
-  b.writeCVOut(velocityCV, 3); //Write velocity CV on channel 3 output
+  b.writeCVOut(3, velocityCV); //Write velocity CV on channel 3 output
 }
 
 
 //NOTE OFF - Sets Gate LOW on Channel 2 if a Note Off message is received
 void OnNoteOff(byte channel, byte note, byte velocity) {
-  b.writeCVOut(0, 2); //When a note-off is received, write a gate LOW on output 2
+  b.writeCVOut(2, 0); //When a note-off is received, write a gate LOW on output 2
   digitalWrite(8, LOW); //Turn LED off when a Note Off is received
 }
 
@@ -73,7 +73,7 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 //AFTERTOUCH - CV Out on Channel 4
 void OnAfterTouch(byte channel, byte pressure) {
   int pressureCV = map(pressure, 0, 127, 0, 4095);
-  b.writeCVOut(pressureCV, 4);
+  b.writeCVOut(4, pressureCV);
 }
 
 
