@@ -119,28 +119,28 @@ void Betweener::begin(void){
     //set up the smoothed analog readout objects
     //this depends on our own modified version of the
     //responsiveAnalogRead library
-    smoothCV1.setup(CVIN1, RASleep, RASnapMultiplier);
+    smoothCV1.begin(CVIN1, RASleep, RASnapMultiplier);
     smoothCV1.setActivityThreshold(RAActivityThreshold);
     
-    smoothCV2.setup(CVIN2, RASleep, RASnapMultiplier);
+    smoothCV2.begin(CVIN2, RASleep, RASnapMultiplier);
     smoothCV2.setActivityThreshold(RAActivityThreshold);
     
-    smoothCV3.setup(CVIN3, RASleep, RASnapMultiplier);
+    smoothCV3.begin(CVIN3, RASleep, RASnapMultiplier);
     smoothCV3.setActivityThreshold(RAActivityThreshold);
     
-    smoothCV4.setup(CVIN4, RASleep, RASnapMultiplier);
+    smoothCV4.begin(CVIN4, RASleep, RASnapMultiplier);
     smoothCV4.setActivityThreshold(RAActivityThreshold);
     
-    smoothKnob1.setup(KNOB1, RASleep, RASnapMultiplier);
+    smoothKnob1.begin(KNOB1, RASleep, RASnapMultiplier);
     smoothKnob1.setActivityThreshold(RAActivityThreshold);
   
-    smoothKnob2.setup(KNOB2, RASleep, RASnapMultiplier);
+    smoothKnob2.begin(KNOB2, RASleep, RASnapMultiplier);
     smoothKnob2.setActivityThreshold(RAActivityThreshold);
     
-    smoothKnob3.setup(KNOB3, RASleep, RASnapMultiplier);
+    smoothKnob3.begin(KNOB3, RASleep, RASnapMultiplier);
     smoothKnob3.setActivityThreshold(RAActivityThreshold);
     
-    smoothKnob4.setup(KNOB4, RASleep, RASnapMultiplier);
+    smoothKnob4.begin(KNOB4, RASleep, RASnapMultiplier);
     smoothKnob4.setActivityThreshold(RAActivityThreshold);
   
     
