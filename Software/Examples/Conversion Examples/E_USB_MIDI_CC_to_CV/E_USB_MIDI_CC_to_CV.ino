@@ -46,19 +46,19 @@ void OnControlChange(byte channel, byte control, byte value) {
 
   switch (control) {
     case  28: //if the controller number is 28, do what is between here and "break;"
-      b.writeCVOut(b.MIDItoCV(value), 1); //Scale the 7bit MIDI value to a 12bit DAC value and write it as a CV
+      b.writeCVOut(1, b.MIDItoCV(value)); //Scale the 7bit MIDI value to a 12bit DAC value and write it as a CV
       break;
 
     case 29:
-      b.writeCVOut(b.MIDItoCV(value), 2);
+      b.writeCVOut(2, b.MIDItoCV(value));
       break;
 
     case 30:
-      b.writeCVOut(b.MIDItoCV(value), 3);
+      b.writeCVOut(3, b.MIDItoCV(value));
       break;
 
     case 31:
-      b.writeCVOut(b.MIDItoCV(value), 4);
+      b.writeCVOut(4, b.MIDItoCV(value));
       break;
 
       default:
